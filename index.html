@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Productividad para Emprendedores Ocupados | Alfredo Armenta</title>
+  <meta name="description" content="Un sistema para ganar tu primer $1,000 extra sin dejar tu trabajo. Diseñado para hombres con familia que quieren libertad, no burnout." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #2E4057;
+      --navy-light: #3a5070;
+      --cream: #F4F1EA;
+      --terra: #D3756B;
+      --terra-dark: #bb5f55;
+      --text: #1a1a2e;
+      --muted: #6b7280;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── UTILITIES ── */
+    .container { max-width: 860px; margin: 0 auto; padding: 0 1.5rem; }
+    .section { padding: 5rem 0; }
+
+    .btn {
+      display: inline-block;
+      background: var(--terra);
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      padding: 1rem 2.2rem;
+      border-radius: 6px;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: background 0.2s, transform 0.15s;
+      letter-spacing: 0.02em;
+    }
+    .btn:hover { background: var(--terra-dark); transform: translateY(-2px); }
+    .btn:active { transform: translateY(0); }
+
+    .btn-lg {
+      font-size: 1.25rem;
+      padding: 1.2rem 2.8rem;
+    }
+
+    /* ── HERO ── */
+    #hero {
+      background: var(--navy);
+      color: #fff;
+      padding: 6rem 0 5rem;
+      text-align: center;
+    }
+
+    #hero .eyebrow {
+      display: inline-block;
+      background: rgba(211,117,107,0.25);
+      color: #f9c3be;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.35rem 1rem;
+      border-radius: 100px;
+      margin-bottom: 1.4rem;
+    }
+
+    #hero h1 {
+      font-size: clamp(2rem, 5.5vw, 3.2rem);
+      font-weight: 800;
+      line-height: 1.15;
+      max-width: 700px;
+      margin: 0 auto 1.2rem;
+    }
+
+    #hero h1 em {
+      font-style: normal;
+      color: var(--terra);
+    }
+
+    #hero p.sub {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: #c8d6e6;
+      max-width: 520px;
+      margin: 0 auto 2.4rem;
+    }
+
+    #hero .price-hint {
+      margin-top: 1.2rem;
+      font-size: 0.9rem;
+      color: #8fadc8;
+    }
+
+    #hero .price-hint strong { color: #fff; }
+
+    /* ── PROBLEM ── */
+    #problem {
+      background: #fff;
+    }
+
+    #problem .label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--terra);
+      margin-bottom: 0.6rem;
+    }
+
+    #problem h2 {
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 1.6rem;
+      line-height: 1.2;
+    }
+
+    #problem .pain-text {
+      font-size: 1.15rem;
+      color: #374151;
+      max-width: 640px;
+      margin-bottom: 2rem;
+    }
+
+    #problem .pain-text strong {
+      color: var(--navy);
+    }
+
+    .pain-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      margin-bottom: 2rem;
+    }
+
+    .pain-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.8rem;
+      font-size: 1.05rem;
+      color: #374151;
+    }
+
+    .pain-list li::before {
+      content: "✗";
+      color: var(--terra);
+      font-weight: 800;
+      font-size: 1rem;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .system-callout {
+      background: var(--cream);
+      border-left: 4px solid var(--terra);
+      padding: 1.2rem 1.5rem;
+      border-radius: 0 8px 8px 0;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--navy);
+      max-width: 600px;
+    }
+
+    /* ── SOLUTION / MODULES ── */
+    #solution {
+      background: var(--cream);
+    }
+
+    #solution .label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--terra);
+      margin-bottom: 0.6rem;
+      text-align: center;
+    }
+
+    #solution h2 {
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      font-weight: 800;
+      color: var(--navy);
+      text-align: center;
+      margin-bottom: 0.8rem;
+      line-height: 1.2;
+    }
+
+    #solution .intro {
+      text-align: center;
+      color: var(--muted);
+      max-width: 520px;
+      margin: 0 auto 3rem;
+      font-size: 1.05rem;
+    }
+
+    .modules {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .module-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 2rem 1.8rem;
+      box-shadow: 0 2px 12px rgba(46,64,87,0.08);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .module-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 28px rgba(46,64,87,0.13);
+    }
+
+    .module-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px; height: 42px;
+      background: var(--navy);
+      color: #fff;
+      font-weight: 800;
+      font-size: 1rem;
+      border-radius: 50%;
+      margin-bottom: 1.1rem;
+    }
+
+    .module-card h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 0.5rem;
+    }
+
+    .module-card p {
+      font-size: 0.95rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    #solution .cta-wrap {
+      text-align: center;
+    }
+
+    /* ── TESTIMONIAL ── */
+    #testimonial {
+      background: var(--navy);
+      color: #fff;
+    }
+
+    .testimonial-card {
+      max-width: 680px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .quote-mark {
+      font-size: 5rem;
+      line-height: 0.8;
+      color: var(--terra);
+      font-family: Georgia, serif;
+      display: block;
+      margin-bottom: 1rem;
+    }
+
+    .testimonial-card blockquote {
+      font-size: clamp(1.1rem, 2.8vw, 1.4rem);
+      font-style: italic;
+      line-height: 1.55;
+      color: #d6e4f0;
+      margin-bottom: 1.8rem;
+    }
+
+    .testimonial-card blockquote strong {
+      color: #fff;
+      font-style: normal;
+    }
+
+    .author-info {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .author-avatar {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: var(--terra);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .author-name { font-weight: 700; font-size: 1rem; }
+    .author-title { font-size: 0.85rem; color: #8fadc8; margin-top: 2px; }
+
+    /* ── FOOTER CTA ── */
+    #footer-cta {
+      background: var(--cream);
+      text-align: center;
+    }
+
+    #footer-cta h2 {
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 0.8rem;
+      line-height: 1.2;
+    }
+
+    #footer-cta p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 480px;
+      margin: 0 auto 2rem;
+    }
+
+    .price-badge {
+      display: inline-block;
+      background: var(--navy);
+      color: #fff;
+      font-size: 2.2rem;
+      font-weight: 800;
+      padding: 0.5rem 1.6rem;
+      border-radius: 8px;
+      margin-bottom: 1.8rem;
+    }
+
+    .price-badge span {
+      font-size: 1rem;
+      font-weight: 400;
+      opacity: 0.7;
+      display: block;
+      margin-top: -4px;
+    }
+
+    .guarantee {
+      margin-top: 1.4rem;
+      font-size: 0.9rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--navy);
+      color: #8fadc8;
+      text-align: center;
+      padding: 2rem 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    footer a {
+      color: #c8d6e6;
+      text-decoration: none;
+    }
+
+    footer a:hover { text-decoration: underline; }
+
+    /* ── STICKY MOBILE BAR ── */
+    .sticky-bar {
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: var(--navy);
+      padding: 0.9rem 1.2rem;
+      z-index: 999;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.25);
+    }
+
+    .sticky-bar p {
+      color: #c8d6e6;
+      font-size: 0.9rem;
+      flex: 1;
+    }
+
+    .sticky-bar strong { color: #fff; display: block; font-size: 1rem; }
+
+    @media (max-width: 640px) {
+      .sticky-bar { display: flex; }
+      body { padding-bottom: 80px; }
+    }
+
+    /* ── ANIMATIONS ── */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.55s ease, transform 0.55s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════ HERO ══════════════════════ -->
+<section id="hero">
+  <div class="container">
+    <div class="eyebrow">Curso Online · Solo $27 USD</div>
+    <h1>Gana Tu Primer <em>$1,000 Extra</em><br>Sin Dejar Tu Trabajo</h1>
+    <p class="sub">Un sistema para hombres con familia que quieren libertad, no burnout.</p>
+    <a href="[REEMPLAZA_CON_TU_LINK_GUMROAD]" class="btn btn-lg" target="_blank" rel="noopener">
+      Quiero el Sistema &rarr;
+    </a>
+    <p class="price-hint">Acceso inmediato · <strong>$27 USD</strong> pago único</p>
+  </div>
+</section>
+
+<!-- ══════════════════════ PROBLEM ══════════════════════ -->
+<section id="problem" class="section">
+  <div class="container">
+    <p class="label fade-in">El problema real</p>
+    <h2 class="fade-in">¿Te suena familiar?</h2>
+    <p class="pain-text fade-in">
+      Trabajas de <strong>8 a 6</strong>. Llegas cansado. Los fines de semana quieres estar con tu familia.
+      Pero necesitas dinero extra y no sabes cómo lograrlo sin sacrificar lo único que importa.
+    </p>
+    <ul class="pain-list fade-in">
+      <li>Tienes ideas, pero nunca el momento para ejecutarlas</li>
+      <li>Pruebas cosas sueltas y no ves resultados</li>
+      <li>El tiempo que tienes lo gastas en lo urgente, no en lo importante</li>
+      <li>Sientes que el dinero extra es solo para los que "tienen tiempo"</li>
+    </ul>
+    <div class="system-callout fade-in">
+      El problema NO es el tiempo. Es que no tienes un <em>sistema</em>.
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ SOLUTION ══════════════════════ -->
+<section id="solution" class="section">
+  <div class="container">
+    <p class="label fade-in">Lo que vas a aprender</p>
+    <h2 class="fade-in">Tres módulos. Un resultado concreto.</h2>
+    <p class="intro fade-in">
+      Sin teoría. Sin cursos interminables. Solo el camino más corto hacia tu primer ingreso extra.
+    </p>
+    <div class="modules">
+      <div class="module-card fade-in">
+        <div class="module-num">1</div>
+        <h3>Auditoría de Dinero</h3>
+        <p>Descubre dónde estás perdiendo dinero (y energía) sin darte cuenta. La mayoría ahorra aquí $200–$400 al mes antes de ganar un solo dólar extra.</p>
+      </div>
+      <div class="module-card fade-in">
+        <div class="module-num">2</div>
+        <h3>Automatización</h3>
+        <p>Configura sistemas simples para vender mientras duermes. Sin empleados, sin tecnología compleja, sin estar pegado al teléfono.</p>
+      </div>
+      <div class="module-card fade-in">
+        <div class="module-num">3</div>
+        <h3>Primera Venta</h3>
+        <p>Un plan de 7 días para conseguir tu primer cliente de pago. Paso a paso, diseñado para ejecutarse con 45 minutos diarios.</p>
+      </div>
+    </div>
+    <div class="cta-wrap fade-in">
+      <a href="[REEMPLAZA_CON_TU_LINK_GUMROAD]" class="btn btn-lg" target="_blank" rel="noopener">
+        Empezar Ahora por $27 &rarr;
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ TESTIMONIAL ══════════════════════ -->
+<section id="testimonial" class="section">
+  <div class="container">
+    <div class="testimonial-card fade-in">
+      <span class="quote-mark">"</span>
+      <blockquote>
+        Yo gané mi primer <strong>$500 en 30 días</strong> con este sistema.
+        No con suerte. No con contactos. Con un proceso claro que cualquiera puede seguir.
+        Aquí te muestro <strong>exactamente cómo lo hice</strong>.
+      </blockquote>
+      <div class="author-info">
+        <div class="author-avatar">AA</div>
+        <div>
+          <div class="author-name">Alfredo Armenta</div>
+          <div class="author-title">Emprendedor · Autor del curso</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ FOOTER CTA ══════════════════════ -->
+<section id="footer-cta" class="section">
+  <div class="container">
+    <h2 class="fade-in">Listo para tu primer $1,000?</h2>
+    <p class="fade-in">Un solo pago. Acceso inmediato. Sin excusas.</p>
+    <div class="fade-in">
+      <div class="price-badge">
+        $27 USD
+        <span>pago único · acceso de por vida</span>
+      </div>
+    </div>
+    <div class="fade-in">
+      <a href="[REEMPLAZA_CON_TU_LINK_GUMROAD]" class="btn btn-lg" target="_blank" rel="noopener">
+        Quiero el Curso Ahora &rarr;
+      </a>
+      <p class="guarantee">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Garantía: si en 7 días no ves valor, te devuelvo el dinero.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ FOOTER ══════════════════════ -->
+<footer>
+  <p>
+    &copy; 2026 Alfredo Armenta ·
+    <a href="mailto:alfredo.armenta.dg@gmail.com">alfredo.armenta.dg@gmail.com</a>
+  </p>
+  <p style="margin-top:0.4rem;">
+    <a href="[REEMPLAZA_CON_TU_LINK_GUMROAD]" target="_blank" rel="noopener">Comprar el Curso &rarr;</a>
+  </p>
+</footer>
+
+<!-- ══════════════════════ STICKY BAR (mobile) ══════════════════════ -->
+<div class="sticky-bar" id="stickyBar">
+  <p><strong>Productividad para Emprendedores</strong>Solo $27 · acceso inmediato</p>
+  <a href="[REEMPLAZA_CON_TU_LINK_GUMROAD]" class="btn" target="_blank" rel="noopener" style="white-space:nowrap;font-size:0.95rem;padding:0.75rem 1.4rem;">
+    Comprar &rarr;
+  </a>
+</div>
+
+<script>
+  // Intersection Observer for fade-in animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // Hide sticky bar once user reaches footer-cta
+  const footerCta = document.getElementById('footer-cta');
+  const stickyBar = document.getElementById('stickyBar');
+
+  const hideObserver = new IntersectionObserver((entries) => {
+    stickyBar.style.display = entries[0].isIntersecting ? 'none' : '';
+  }, { threshold: 0.1 });
+
+  hideObserver.observe(footerCta);
+</script>
+</body>
+</html>
