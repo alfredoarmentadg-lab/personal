@@ -348,14 +348,120 @@
       margin-top: -4px;
     }
 
-    .guarantee {
-      margin-top: 1.4rem;
-      font-size: 0.9rem;
-      color: var(--muted);
+    /* ── GUARANTEE SEAL ── */
+    .guarantee-wrap {
+      margin-top: 2rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .seal {
+      position: relative;
+      width: 140px;
+      height: 140px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.4rem;
+      cursor: default;
+    }
+
+    /* Starburst via clip-path polygon */
+    .seal-bg {
+      position: absolute;
+      inset: 0;
+      background: conic-gradient(
+        #c8960c 0deg, #f5d060 15deg, #c8960c 30deg,
+        #f5d060 45deg, #c8960c 60deg, #f5d060 75deg,
+        #c8960c 90deg, #f5d060 105deg, #c8960c 120deg,
+        #f5d060 135deg, #c8960c 150deg, #f5d060 165deg,
+        #c8960c 180deg, #f5d060 195deg, #c8960c 210deg,
+        #f5d060 225deg, #c8960c 240deg, #f5d060 255deg,
+        #c8960c 270deg, #f5d060 285deg, #c8960c 300deg,
+        #f5d060 315deg, #c8960c 330deg, #f5d060 345deg,
+        #c8960c 360deg
+      );
+      border-radius: 50%;
+      clip-path: polygon(
+        50% 0%, 56% 6%, 63% 2%, 67% 9%, 75% 7%, 77% 15%,
+        85% 15%, 85% 23%, 93% 25%, 91% 33%, 99% 37%, 95% 44%,
+        100% 50%, 95% 56%, 99% 63%, 91% 67%, 93% 75%, 85% 77%,
+        85% 85%, 77% 85%, 75% 93%, 67% 91%, 63% 98%, 56% 94%,
+        50% 100%, 44% 94%, 37% 98%, 33% 91%, 25% 93%, 23% 85%,
+        15% 85%, 15% 77%, 7% 75%, 9% 67%, 1% 63%, 5% 56%,
+        0% 50%, 5% 44%, 1% 37%, 9% 33%, 7% 25%, 15% 23%,
+        15% 15%, 23% 15%, 25% 7%, 33% 9%, 37% 2%, 44% 6%
+      );
+      box-shadow: 0 0 0 2px #a87008 inset;
+    }
+
+    .seal-inner {
+      position: relative;
+      width: 106px;
+      height: 106px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 38% 35%, #1a1a2a 0%, #0d0d1a 70%);
+      border: 3px solid #c8960c;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      z-index: 1;
+      box-shadow: 0 0 10px rgba(200,150,12,0.5) inset, 0 2px 8px rgba(0,0,0,0.5);
+    }
+
+    .seal-top {
+      font-size: 0.52rem;
+      font-weight: 900;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #f5d060;
+      line-height: 1;
+      margin-bottom: 2px;
+    }
+
+    .seal-number {
+      font-size: 2.6rem;
+      font-weight: 900;
+      color: #f5d060;
+      line-height: 1;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+    }
+
+    .seal-unit {
+      font-size: 0.6rem;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #f5d060;
+      line-height: 1;
+      margin-bottom: 3px;
+    }
+
+    .seal-bottom {
+      font-size: 0.45rem;
+      font-weight: 900;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #f5d060;
+      line-height: 1;
+    }
+
+    .seal-stars {
+      font-size: 0.55rem;
+      color: #f5d060;
+      letter-spacing: 0.1em;
+      line-height: 1;
+      margin: 1px 0;
+    }
+
+    .seal-caption {
+      margin-top: 0.8rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+      max-width: 200px;
+      line-height: 1.4;
+      text-align: center;
     }
 
     /* ── FOOTER ── */
@@ -518,10 +624,22 @@
       <a href="[REEMPLAZA_CON_TU_LINK_GUMROAD]" class="btn btn-lg" target="_blank" rel="noopener">
         Quiero el Curso Ahora &rarr;
       </a>
-      <p class="guarantee">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        Garantía: si en 7 días no ves valor, te devuelvo el dinero.
-      </p>
+      <div class="guarantee-wrap">
+        <div>
+          <div class="seal" title="Garantía 7 días">
+            <div class="seal-bg"></div>
+            <div class="seal-inner">
+              <div class="seal-top">Garantía</div>
+              <div class="seal-stars">★ ★ ★</div>
+              <div class="seal-number">7</div>
+              <div class="seal-unit">Días</div>
+              <div class="seal-stars">★ ★ ★</div>
+              <div class="seal-bottom">Garantía</div>
+            </div>
+          </div>
+          <p class="seal-caption">Si en 7 días no ves valor,<br>te devuelvo el dinero.</p>
+        </div>
+      </div>
     </div>
   </div>
 </section>
