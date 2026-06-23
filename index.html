@@ -532,91 +532,11 @@
         Quiero el Curso Ahora &rarr;
       </a>
       <div class="guarantee-wrap">
-        <!-- SVG guarantee seal – fully inline, no external deps -->
-        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Garantía 7 días">
-          <defs>
-            <!-- Gold outer ring gradient -->
-            <radialGradient id="goldRing" cx="50%" cy="35%" r="65%">
-              <stop offset="0%"   stop-color="#ffe87a"/>
-              <stop offset="40%"  stop-color="#d4a017"/>
-              <stop offset="75%"  stop-color="#a87008"/>
-              <stop offset="100%" stop-color="#7a4f00"/>
-            </radialGradient>
-            <!-- Dark inner circle gradient -->
-            <radialGradient id="darkInner" cx="40%" cy="35%" r="65%">
-              <stop offset="0%"   stop-color="#2a2840"/>
-              <stop offset="100%" stop-color="#0d0c1a"/>
-            </radialGradient>
-            <!-- Gold text gradient -->
-            <linearGradient id="goldText" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%"   stop-color="#ffe87a"/>
-              <stop offset="50%"  stop-color="#f5c518"/>
-              <stop offset="100%" stop-color="#c8960c"/>
-            </linearGradient>
-            <!-- Rays behind inner circle -->
-            <radialGradient id="rayGrad" cx="50%" cy="50%" r="50%">
-              <stop offset="0%"   stop-color="#f5c518" stop-opacity="0.9"/>
-              <stop offset="100%" stop-color="#a87008" stop-opacity="0.4"/>
-            </radialGradient>
-          </defs>
-
-          <!-- 36-point starburst (outer) -->
-          <polygon
-            fill="url(#goldRing)"
-            points="
-              100,4   107,18  122,8   125,24  141,18  140,35
-              157,33  152,49  169,52  160,66  177,74  164,85
-              178,96  163,103 173,116 156,119 162,134 144,133
-              146,149 128,144 126,160 108,151 102,167 93,152
-              74,160  72,144  54,149  56,133  38,134  44,119
-              27,116  37,103  22,96   36,85   23,74   40,66
-              31,52   48,49   43,33   60,35   59,18   75,24
-              78,8    93,18
-            "
-          />
-          <!-- Thin gold rim before dark circle -->
-          <circle cx="100" cy="100" r="69" fill="#c8960c"/>
-          <circle cx="100" cy="100" r="66" fill="#ffe07a"/>
-          <!-- Dark inner disc -->
-          <circle cx="100" cy="100" r="62" fill="url(#darkInner)"/>
-          <!-- Subtle inner glow ring -->
-          <circle cx="100" cy="100" r="62" fill="none" stroke="#c8960c" stroke-width="1.5" stroke-opacity="0.7"/>
-
-          <!-- ★ ★ ★  top -->
-          <text x="100" y="50" text-anchor="middle" font-size="9" fill="url(#goldText)" font-family="serif" letter-spacing="5">★ ★ ★</text>
-
-          <!-- GARANTÍA top arc -->
-          <path id="topArc" d="M 42,100 A 58,58 0 0,1 158,100" fill="none"/>
-          <text font-size="10.5" font-weight="900" font-family="'Segoe UI',sans-serif" letter-spacing="3.5" fill="url(#goldText)">
-            <textPath href="#topArc" startOffset="50%" text-anchor="middle">GARANTÍA</textPath>
-          </text>
-
-          <!-- BIG "7" -->
-          <text x="100" y="112" text-anchor="middle"
-            font-size="64" font-weight="900"
-            font-family="'Segoe UI',Arial,sans-serif"
-            fill="url(#goldText)"
-            style="filter:drop-shadow(0 2px 4px rgba(0,0,0,0.6))">7</text>
-
-          <!-- DÍAS label -->
-          <text x="100" y="132" text-anchor="middle"
-            font-size="13" font-weight="800" letter-spacing="4"
-            font-family="'Segoe UI',sans-serif"
-            fill="url(#goldText)">DÍAS</text>
-
-          <!-- GARANTÍA bottom arc -->
-          <path id="botArc" d="M 42,100 A 58,58 0 0,0 158,100" fill="none"/>
-          <text font-size="10.5" font-weight="900" font-family="'Segoe UI',sans-serif" letter-spacing="3.5" fill="url(#goldText)">
-            <textPath href="#botArc" startOffset="50%" text-anchor="middle">GARANTÍA</textPath>
-          </text>
-
-          <!-- ★ ★ ★  bottom -->
-          <text x="100" y="163" text-anchor="middle" font-size="9" fill="url(#goldText)" font-family="serif" letter-spacing="5">★ ★ ★</text>
-        </svg>
-        <p class="seal-caption">Si en 7 días no ves valor,<br>te devuelvo el dinero.</p>
-      </div>
-    </div>
-  </div>
+  <img src="https://raw.githubusercontent.com/alfredoarmentadg-lab/personal/claude/lucid-rubin-oppm8v/sello_7dias.png" 
+       alt="Garantía 7 días" 
+       style="width: 160px; height: 160px; filter: drop-shadow(0 6px 18px rgba(180,130,0,0.45));">
+  <p class="seal-caption">Si en 7 días no ves valor,<br>te devuelvo el dinero.</p>
+</div>
 </section>
 
 <!-- ══════════════════════ FOOTER ══════════════════════ -->
