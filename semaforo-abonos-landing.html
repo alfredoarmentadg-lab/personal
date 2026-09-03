@@ -1,0 +1,481 @@
+<!-- ============================================================
+     LANDING · El Semáforo de Abonos Caseros
+     Pegar TODO este bloque dentro de un elemento "Código personalizado / HTML"
+     de Systeme.io. No lleva <html>, <head> ni <body> a propósito: así no rompe
+     el layout del editor. Todo el CSS vive bajo .sac-lp y no toca nada externo.
+
+     PALETA (para configurar igual el formulario nativo de Systeme.io):
+       Fondo oscuro .......... #1a3a2e
+       Fondo oscuro profundo . #12291f
+       Verde salvia .......... #8fbc94
+       Crema ................. #f5f0e6
+       Botón: fondo #8fbc94 · texto #12291f · radio 10px · alto 56px · peso 600
+       Input: alto 56px · radio 10px · borde rgba(143,188,148,.5)
+     ============================================================ -->
+
+<div class="sac-lp">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600..700&family=Inter:wght@400;500;600&display=swap');
+
+.sac-lp{
+  --sac-dark:#1a3a2e;
+  --sac-darker:#12291f;
+  --sac-sage:#8fbc94;
+  --sac-sage-dim:#5f8f68;
+  --sac-cream:#f5f0e6;
+  --sac-card:#fffdf7;
+  --sac-line:#e2d9c6;
+  --sac-ink:#1c2b23;
+  --sac-ink-soft:#4d5f55;
+  --sac-red:#c9584c;
+  --sac-amber:#dd9f3f;
+  --sac-green:#6fa25e;
+  --sac-serif:'Fraunces','Iowan Old Style','Palatino Linotype',Palatino,Georgia,'Times New Roman',serif;
+  --sac-sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+
+  font-family:var(--sac-sans);
+  font-size:16px;
+  color:var(--sac-cream);
+  background:var(--sac-dark);
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  width:100%;
+  overflow-x:hidden;
+}
+.sac-lp *,.sac-lp *::before,.sac-lp *::after{box-sizing:border-box;}
+.sac-lp h1,.sac-lp h2,.sac-lp p,.sac-lp ul,.sac-lp li,.sac-lp figure{margin:0;padding:0;}
+.sac-lp ul{list-style:none;}
+.sac-lp svg,.sac-lp img{max-width:100%;display:block;}
+
+.sac-lp .sac-wrap{width:100%;max-width:1080px;margin:0 auto;padding:0 22px;}
+
+/* ---------- 1 · HERO ---------- */
+.sac-lp .sac-hero{
+  position:relative;
+  background:
+    radial-gradient(120% 85% at 78% 6%, rgba(143,188,148,.20) 0%, rgba(26,58,46,0) 62%),
+    var(--sac-dark);
+  padding:50px 0 58px;
+  overflow:hidden;
+}
+.sac-lp .sac-hero::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:1px;
+  background:linear-gradient(90deg,rgba(143,188,148,0),rgba(143,188,148,.5),rgba(143,188,148,0));
+}
+.sac-lp .sac-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  border:1px solid rgba(143,188,148,.42);
+  color:var(--sac-sage);
+  border-radius:999px;
+  padding:8px 15px 8px 12px;
+  font-size:12px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;
+  line-height:1;
+}
+.sac-lp .sac-eyebrow svg{width:16px;height:16px;flex:0 0 16px;}
+
+.sac-lp h1{
+  font-family:var(--sac-serif);
+  font-weight:700;
+  font-size:clamp(2.15rem,8.6vw,3.85rem);
+  line-height:1.05;
+  letter-spacing:-.02em;
+  color:var(--sac-cream);
+  margin:24px 0 0;
+  max-width:16ch;
+}
+.sac-lp .sac-sub{
+  margin:22px 0 0;
+  font-size:clamp(1rem,4.1vw,1.15rem);
+  color:rgba(245,240,230,.82);
+  max-width:52ch;
+}
+.sac-lp .sac-hero-cta{margin-top:32px;}
+
+/* ---------- BOTÓN ---------- */
+.sac-lp .sac-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;max-width:400px;
+  min-height:56px;
+  padding:15px 28px;
+  background:var(--sac-sage);
+  color:var(--sac-darker);
+  font-family:var(--sac-sans);
+  font-size:1.02rem;font-weight:600;letter-spacing:.01em;
+  text-decoration:none;
+  border:0;border-radius:10px;
+  cursor:pointer;
+  box-shadow:0 12px 26px -16px rgba(0,0,0,.8);
+  transition:background .2s ease,transform .15s ease;
+}
+.sac-lp .sac-btn:hover{background:#a5cfa9;transform:translateY(-2px);}
+.sac-lp .sac-btn:active{transform:translateY(0);}
+.sac-lp .sac-btn:focus-visible{outline:2px solid var(--sac-cream);outline-offset:3px;}
+.sac-lp .sac-btn svg{width:18px;height:18px;flex:0 0 18px;}
+
+.sac-lp .sac-micro{
+  margin:14px 0 0;
+  font-size:.86rem;
+  color:rgba(143,188,148,.92);
+  display:flex;align-items:center;gap:7px;
+}
+.sac-lp .sac-micro svg{width:15px;height:15px;flex:0 0 15px;}
+
+/* ---------- ILUSTRACIÓN ---------- */
+.sac-lp .sac-art{
+  margin:36px auto 0;
+  max-width:318px;
+  color:var(--sac-sage);
+}
+.sac-lp .sac-art svg{width:100%;height:auto;}
+
+/* ---------- 2 · BENEFICIOS ---------- */
+.sac-lp .sac-benefits{background:var(--sac-cream);color:var(--sac-ink);padding:54px 0 58px;}
+.sac-lp .sac-kicker{
+  display:flex;align-items:center;gap:11px;
+  margin:0;
+  font-size:12px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--sac-ink-soft);
+}
+.sac-lp .sac-dots{display:inline-flex;gap:5px;}
+.sac-lp .sac-dots i{width:9px;height:9px;border-radius:50%;display:block;}
+.sac-lp .sac-dots i:nth-child(1){background:var(--sac-red);}
+.sac-lp .sac-dots i:nth-child(2){background:var(--sac-amber);}
+.sac-lp .sac-dots i:nth-child(3){background:var(--sac-green);}
+
+.sac-lp h2{
+  font-family:var(--sac-serif);
+  font-weight:600;
+  font-size:clamp(1.6rem,6.3vw,2.35rem);
+  line-height:1.16;
+  letter-spacing:-.015em;
+  margin:16px 0 0;
+  max-width:20ch;
+}
+.sac-lp .sac-benefits h2{color:var(--sac-dark);}
+
+.sac-lp .sac-list{margin:30px 0 0;display:grid;gap:14px;}
+.sac-lp .sac-item{
+  display:flex;gap:14px;align-items:flex-start;
+  background:var(--sac-card);
+  border:1px solid var(--sac-line);
+  border-left:4px solid var(--sac-line);
+  border-radius:12px;
+  padding:20px 20px 20px 18px;
+}
+.sac-lp .sac-item:nth-child(1){border-left-color:var(--sac-red);}
+.sac-lp .sac-item:nth-child(2){border-left-color:var(--sac-amber);}
+.sac-lp .sac-item:nth-child(3){border-left-color:var(--sac-green);}
+.sac-lp .sac-item svg{width:24px;height:24px;flex:0 0 24px;margin-top:2px;color:var(--sac-sage-dim);}
+.sac-lp .sac-item p{font-size:1rem;color:var(--sac-ink);}
+
+/* ---------- 3 · CAPTURA ---------- */
+.sac-lp .sac-capture{
+  background:var(--sac-darker);
+  padding:56px 0 54px;
+  scroll-margin-top:24px;
+}
+.sac-lp .sac-capture-inner{max-width:520px;margin:0 auto;text-align:center;}
+.sac-lp .sac-capture .sac-kicker{color:var(--sac-sage);justify-content:center;}
+.sac-lp .sac-capture h2{color:var(--sac-cream);margin:16px auto 0;max-width:15ch;}
+.sac-lp .sac-capture-sub{
+  margin:14px 0 0;
+  color:rgba(245,240,230,.75);
+  font-size:1rem;
+}
+.sac-lp .sac-capture .sac-micro{justify-content:center;margin-top:18px;}
+
+/* Contenedor del embed de Systeme.io: mantiene el alto y ancho de un form real */
+.sac-lp .sac-form-slot{
+  margin:26px auto 0;
+  width:100%;
+  max-width:400px;
+  min-height:150px;
+  text-align:left;
+}
+/* Fuerza el formulario nativo de Systeme.io al ancho del slot */
+.sac-lp .sac-form-slot form,
+.sac-lp .sac-form-slot input,
+.sac-lp .sac-form-slot button{width:100%;max-width:100%;}
+
+/* Maqueta visual · se borra al pegar el formulario real */
+.sac-lp .sac-form-mock{display:grid;gap:12px;}
+.sac-lp .sac-mock-field{
+  height:56px;border-radius:10px;
+  border:1px dashed rgba(143,188,148,.5);
+  background:rgba(143,188,148,.07);
+  display:flex;align-items:center;padding:0 16px;
+  color:rgba(245,240,230,.42);font-size:.95rem;
+}
+.sac-lp .sac-mock-btn{
+  height:56px;border-radius:10px;
+  background:var(--sac-sage);color:var(--sac-darker);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:600;font-size:1.02rem;
+}
+.sac-lp .sac-mock-note{
+  margin:12px 0 0;text-align:center;
+  font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;
+  color:rgba(143,188,148,.5);
+}
+
+/* ---------- 4 · FOOTER ---------- */
+.sac-lp .sac-foot{
+  background:var(--sac-darker);
+  border-top:1px solid rgba(143,188,148,.18);
+  padding:24px 0 30px;
+  text-align:center;
+}
+.sac-lp .sac-foot p{font-size:.84rem;color:rgba(245,240,230,.55);}
+
+/* ---------- ANIMACIÓN DE ENTRADA ---------- */
+.sac-lp.sac-js .sac-reveal{opacity:0;transform:translateY(18px);}
+.sac-lp.sac-js .sac-reveal.sac-in{
+  opacity:1;transform:none;
+  transition:opacity .65s cubic-bezier(.2,.6,.2,1),transform .65s cubic-bezier(.2,.6,.2,1);
+}
+@media (prefers-reduced-motion:reduce){
+  .sac-lp.sac-js .sac-reveal{opacity:1;transform:none;transition:none;}
+  .sac-lp .sac-btn{transition:none;}
+}
+
+/* ---------- DESKTOP ---------- */
+@media (min-width:820px){
+  .sac-lp .sac-hero{padding:80px 0 86px;}
+  .sac-lp .sac-hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:54px;align-items:center;}
+  .sac-lp .sac-art{margin:0;max-width:400px;}
+  .sac-lp .sac-btn{width:auto;min-width:304px;}
+  .sac-lp .sac-benefits{padding:82px 0;}
+  .sac-lp .sac-list{grid-template-columns:repeat(3,1fr);gap:18px;margin-top:38px;}
+  .sac-lp .sac-item{flex-direction:column;gap:15px;padding:26px 24px;}
+  .sac-lp .sac-capture{padding:88px 0 78px;}
+}
+</style>
+
+<!-- ===================== 1 · HERO ===================== -->
+<section class="sac-hero">
+  <div class="sac-wrap sac-hero-grid">
+
+    <div class="sac-hero-copy">
+      <span class="sac-eyebrow sac-reveal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M5 19c0-7.2 5.6-12 14-12 0 8.6-5.1 13-10 13-2.6 0-4-.5-4-1z" stroke-linejoin="round"/>
+          <path d="M5.6 18.6C9.1 15 12.6 12.5 17 10.6" stroke-linecap="round"/>
+        </svg>
+        Guía gratuita en PDF
+      </span>
+
+      <h1 class="sac-reveal">El error que mata más plantas que las plagas</h1>
+
+      <p class="sac-sub sac-reveal">Café, avena, lentejas o compost: cada uno tiene su dosis exacta según la planta. Si le pones la de un jitomate a un cactus, en dos semanas está podrido.</p>
+
+      <!-- Este botón solo hace scroll al formulario. Si no lo quieres, borra el div .sac-hero-cta completo. -->
+      <div class="sac-hero-cta sac-reveal">
+        <a class="sac-btn" href="#sac-formulario" data-sac-scroll>
+          Quiero la guía gratis
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>
+          </svg>
+        </a>
+        <p class="sac-micro">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+            <rect x="4" y="10.5" width="16" height="10" rx="2.5"/><path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7" stroke-linecap="round"/>
+          </svg>
+          Descarga inmediata. Sin spam.
+        </p>
+      </div>
+    </div>
+
+    <figure class="sac-art sac-reveal" aria-hidden="true">
+      <svg viewBox="0 0 300 320" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="146" cy="158" r="118" stroke-dasharray="2 9" opacity=".38" stroke-width="1.6"/>
+
+        <path d="M150 222C150 192 150 162 148 134" opacity=".9"/>
+        <path d="M150 222C158 196 174 176 196 160" opacity=".9"/>
+        <path d="M150 224C142 200 128 184 106 170" opacity=".9"/>
+
+        <g transform="translate(148 134) rotate(-100)" opacity=".95">
+          <path d="M0 0C12 -13 34 -17 54 0C34 17 12 13 0 0Z"/><path d="M5 0H47" stroke-width="1.4" opacity=".7"/>
+        </g>
+        <g transform="translate(196 160) rotate(-32)" opacity=".95">
+          <path d="M0 0C12 -13 34 -17 54 0C34 17 12 13 0 0Z"/><path d="M5 0H47" stroke-width="1.4" opacity=".7"/>
+        </g>
+        <g transform="translate(176 178) rotate(24) scale(.78)" opacity=".9">
+          <path d="M0 0C12 -13 34 -17 54 0C34 17 12 13 0 0Z"/><path d="M5 0H47" stroke-width="1.7" opacity=".7"/>
+        </g>
+        <g transform="translate(106 170) rotate(188) scale(.95)" opacity=".95">
+          <path d="M0 0C12 -13 34 -17 54 0C34 17 12 13 0 0Z"/><path d="M5 0H47" stroke-width="1.5" opacity=".7"/>
+        </g>
+        <g transform="translate(126 188) rotate(158) scale(.74)" opacity=".9">
+          <path d="M0 0C12 -13 34 -17 54 0C34 17 12 13 0 0Z"/><path d="M5 0H47" stroke-width="1.8" opacity=".7"/>
+        </g>
+        <g transform="translate(150 178) rotate(-142) scale(.7)" opacity=".85">
+          <path d="M0 0C12 -13 34 -17 54 0C34 17 12 13 0 0Z"/><path d="M5 0H47" stroke-width="1.9" opacity=".7"/>
+        </g>
+
+        <rect x="88" y="220" width="124" height="26" rx="7"/>
+        <path d="M97 252L109 297C110 301 113 303 117 303H183C187 303 190 301 191 297L203 252"/>
+        <path d="M112 268H188" opacity=".35" stroke-width="1.4"/>
+
+        <g transform="translate(224 52)">
+          <rect x="0" y="0" width="46" height="106" rx="23" opacity=".85"/>
+          <circle cx="23" cy="26" r="10.5" fill="#c9584c" stroke="none"/>
+          <circle cx="23" cy="53" r="10.5" fill="#dd9f3f" stroke="none"/>
+          <circle cx="23" cy="80" r="10.5" fill="#6fa25e" stroke="none"/>
+        </g>
+      </svg>
+    </figure>
+
+  </div>
+</section>
+
+<!-- ===================== 2 · BENEFICIOS ===================== -->
+<section class="sac-benefits">
+  <div class="sac-wrap">
+    <p class="sac-kicker sac-reveal">
+      <span class="sac-dots"><i></i><i></i><i></i></span>
+      Dentro de la guía
+    </p>
+    <h2 class="sac-reveal">Tres semáforos y ya sabes cuánto ponerle</h2>
+
+    <ul class="sac-list">
+      <li class="sac-item sac-reveal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <circle cx="12" cy="12" r="9.4"/><path d="M7.8 12.4l2.9 2.9 5.5-6.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <p>La guía gratis que te dice si tu abono casero está en rojo, amarillo o verde — antes de que la hoja se ponga amarilla</p>
+      </li>
+      <li class="sac-item sac-reveal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <circle cx="12" cy="12" r="9.4"/><path d="M7.8 12.4l2.9 2.9 5.5-6.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <p>Dosis exacta por tipo de planta: cactus, hortalizas, interior y árboles frutales</p>
+      </li>
+      <li class="sac-item sac-reveal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <circle cx="12" cy="12" r="9.4"/><path d="M7.8 12.4l2.9 2.9 5.5-6.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <p>Qué hacer si ya te pasaste de dosis (la señal de alarma que la mayoría ignora)</p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===================== 3 · CAPTURA ===================== -->
+<section class="sac-capture" id="sac-formulario">
+  <div class="sac-wrap">
+    <div class="sac-capture-inner">
+      <p class="sac-kicker sac-reveal">
+        <span class="sac-dots"><i></i><i></i><i></i></span>
+        Semáforo de abonos caseros
+      </p>
+      <h2 class="sac-reveal">Dime a dónde te la mando</h2>
+      <p class="sac-capture-sub sac-reveal">Escribe tu correo y te llega el PDF en menos de un minuto.</p>
+
+      <!-- ==========================================================
+           PEGAR AQUÍ EL EMBED DE FORMULARIO DE SYSTEME.IO
+           (dentro de este div, en lugar del bloque .sac-form-mock)
+           ========================================================== -->
+      <div id="systeme-form-placeholder" class="sac-form-slot sac-reveal">
+
+        <!-- ↓↓↓ MAQUETA VISUAL · BORRA ESTE DIV COMPLETO AL PEGAR EL FORMULARIO REAL ↓↓↓ -->
+        <div class="sac-form-mock" aria-hidden="true">
+          <div class="sac-mock-field">tu@correo.com</div>
+          <div class="sac-mock-btn">Quiero la guía gratis</div>
+          <p class="sac-mock-note">Formulario de Systeme.io va aquí</p>
+        </div>
+        <!-- ↑↑↑ FIN DE LA MAQUETA VISUAL ↑↑↑ -->
+
+      </div>
+
+      <p class="sac-micro sac-reveal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <rect x="4" y="10.5" width="16" height="10" rx="2.5"/><path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7" stroke-linecap="round"/>
+        </svg>
+        Descarga inmediata. Sin spam.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 4 · FOOTER ===================== -->
+<footer class="sac-foot">
+  <div class="sac-wrap">
+    <p>Al registrarte aceptas recibir el PDF por correo.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var root = null;
+  if (document.currentScript && document.currentScript.closest) {
+    root = document.currentScript.closest('.sac-lp');
+  }
+  if (!root) {
+    var all = document.querySelectorAll('.sac-lp');
+    root = all[all.length - 1];
+  }
+  if (!root || root.getAttribute('data-sac-ready') === '1') return;
+  root.setAttribute('data-sac-ready', '1');
+  root.classList.add('sac-js');
+
+  var items = [].slice.call(root.querySelectorAll('.sac-reveal'));
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function showAll() {
+    for (var i = 0; i < items.length; i++) items[i].classList.add('sac-in');
+    items = [];
+  }
+
+  if (reduce) {
+    showAll();
+  } else {
+    // Escalona la entrada de los elementos hermanos
+    var lastParent = null, groupIndex = 0;
+    for (var j = 0; j < items.length; j++) {
+      var parent = items[j].parentNode;
+      groupIndex = (parent === lastParent) ? groupIndex + 1 : 0;
+      lastParent = parent;
+      items[j].style.transitionDelay = (groupIndex * 70) + 'ms';
+    }
+
+    var queued = false;
+    function check() {
+      queued = false;
+      var vh = window.innerHeight || document.documentElement.clientHeight;
+      var pending = [];
+      for (var k = 0; k < items.length; k++) {
+        // top negativo = ya quedó arriba de la pantalla (scroll rápido) → también se muestra
+        if (items[k].getBoundingClientRect().top < vh * 0.92) items[k].classList.add('sac-in');
+        else pending.push(items[k]);
+      }
+      items = pending;
+      if (!items.length) {
+        window.removeEventListener('scroll', onScroll);
+        window.removeEventListener('resize', onScroll);
+      }
+    }
+    function onScroll() {
+      if (queued) return;
+      queued = true;
+      (window.requestAnimationFrame || window.setTimeout)(check, 16);
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    check();
+  }
+
+  root.addEventListener('click', function (e) {
+    var link = (e.target && e.target.closest) ? e.target.closest('[data-sac-scroll]') : null;
+    if (!link || !root.contains(link)) return;
+    var target = root.querySelector('#sac-formulario');
+    if (!target) return;
+    e.preventDefault();
+    target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+  });
+})();
+</script>
+
+</div>
+<!-- ===== FIN LANDING · El Semáforo de Abonos Caseros ===== -->
