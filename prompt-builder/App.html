@@ -2,95 +2,99 @@
 (function () {
   'use strict';
 
-  var estado = { prompts: [], filtro: '', meta: {}, promptActual: null };
+  var CLAVE = 'asistente-prompts';
+  var estado = { prompts: [], filtro: '', categoria: 'todos', favoritos: [], meta: {} };
   var $ = function (id) { return document.getElementById(id); };
 
-  /* ── Puente con el backend (o con el mock en la vista previa) ── */
+  /* ── Puente con el backend (o con el mock de la vista previa) ── */
   function api(nombre) {
     var args = Array.prototype.slice.call(arguments, 1);
     return new Promise(function (ok, mal) {
       if (window.MOCK_API && window.MOCK_API[nombre]) {
         setTimeout(function () {
-          try { ok(window.MOCK_API[nombre].apply(null, args)); }
-          catch (e) { mal(e); }
-        }, window.MOCK_API.__retardo || 250);
+          try { ok(window.MOCK_API[nombre].apply(null, args)); } catch (e) { mal(e); }
+        }, window.MOCK_API.__retardo || 220);
         return;
       }
       google.script.run.withSuccessHandler(ok).withFailureHandler(mal)[nombre].apply(null, args);
     });
   }
 
-  /* ── Almacenamiento local (sobrevive a recargas) ── */
+  /* ── Persistencia ── */
   function guardar() {
     try {
-      localStorage.setItem('asistente-prompts', JSON.stringify({
+      localStorage.setItem(CLAVE, JSON.stringify({
         producto: $('producto').value,
         url: $('url').value,
         extra: $('extra').value,
-        meta: estado.meta
+        meta: estado.meta,
+        favoritos: estado.favoritos
       }));
-    } catch (e) { /* modo incógnito */ }
+    } catch (e) { /* incógnito */ }
   }
 
   function restaurar() {
     var d;
-    try { d = JSON.parse(localStorage.getItem('asistente-prompts') || '{}'); }
-    catch (e) { d = {}; }
+    try { d = JSON.parse(localStorage.getItem(CLAVE) || '{}'); } catch (e) { d = {}; }
     $('producto').value = d.producto || '';
     $('url').value = d.url || '';
     $('extra').value = d.extra || '';
+    estado.favoritos = Array.isArray(d.favoritos) ? d.favoritos : [];
     if (d.extra) $('extra').closest('details').open = true;
-    if (d.meta && (d.meta.titulo || d.meta.descripcion || d.meta.precio)) {
-      pintarMeta(d.meta);
-    }
+    if (d.meta && (d.meta.titulo || d.meta.descripcion || d.meta.precio)) pintarLectura(d.meta);
   }
 
-  /* ── Variables disponibles en las plantillas ── */
-  function variables() {
+  /* ── Variables de plantilla ──
+     modoMuestra deja marcadores visibles en lugar de vaciar los huecos,
+     para que la tarjeta enseñe la forma del prompt antes de rellenar nada. */
+  function variables(modoMuestra) {
     var url = $('url').value.trim();
-    var dominio = '';
     var m = url.match(/^https?:\/\/([^\/\?#:]+)/i);
-    if (m) dominio = m[1].replace(/^www\./i, '');
     var hoy = new Date();
-    var iso = hoy.getFullYear() + '-' +
-      String(hoy.getMonth() + 1).padStart(2, '0') + '-' +
-      String(hoy.getDate()).padStart(2, '0');
-
-    return {
+    var v = {
       producto: $('producto').value.trim(),
       url: url,
       titulo: $('mTitulo').value.trim(),
       descripcion: $('mDescripcion').value.trim(),
       precio: $('mPrecio').value.trim(),
-      sitio: dominio,
+      sitio: m ? m[1].replace(/^www\./i, '') : '',
       extra: $('extra').value.trim(),
-      fecha: iso
+      fecha: hoy.getFullYear() + '-' +
+        String(hoy.getMonth() + 1).padStart(2, '0') + '-' +
+        String(hoy.getDate()).padStart(2, '0')
     };
+    if (modoMuestra) {
+      Object.keys(v).forEach(function (k) { if (!v[k]) v[k] = '‹' + k + '›'; });
+    }
+    return v;
   }
+
+  var PATRON = /\{\{\s*(\w+)\s*\}\}/g;
 
   /**
    * Rellena la plantilla. Si una línea contiene SOLO variables vacías,
-   * la línea entera desaparece (no quedan etiquetas huérfanas tipo "Precio:").
+   * la línea entera desaparece: no quedan etiquetas huérfanas tipo "Precio:".
    */
   function rellenar(plantilla, vars) {
-    var patron = /\{\{\s*(\w+)\s*\}\}/g;
-    var salida = String(plantilla).split('\n').filter(function (linea) {
-      var usadas = linea.match(patron);
+    return String(plantilla).split('\n').filter(function (linea) {
+      var usadas = linea.match(PATRON);
       if (!usadas) return true;
       return usadas.some(function (t) {
-        var clave = t.replace(/[{}\s]/g, '');
-        return String(vars[clave] || '').trim() !== '';
+        return String(vars[t.replace(/[{}\s]/g, '')] || '').trim() !== '';
       });
     }).map(function (linea) {
-      return linea.replace(patron, function (_, clave) {
+      return linea.replace(PATRON, function (_, clave) {
         return vars[clave] != null ? vars[clave] : '';
       });
-    });
-
-    return salida.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+    }).join('\n').replace(/\n{3,}/g, '\n\n').trim();
   }
 
-  /* ── Copiar al portapapeles, con dos planes B ── */
+  function palabras(texto) {
+    var n = texto.trim().split(/\s+/).filter(Boolean).length;
+    return n;
+  }
+
+  /* ── Portapapeles, con dos planes B ── */
   function copiar(texto) {
     return new Promise(function (ok, mal) {
       if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -115,7 +119,6 @@
     bien ? ok() : mal(new Error('sin-portapapeles'));
   }
 
-  /* ── Avisos ── */
   var relojToast;
   function toast(texto, malo) {
     var t = $('toast');
@@ -125,68 +128,151 @@
     relojToast = setTimeout(function () { t.className = ''; }, 2600);
   }
 
-  /* ── Pintar la lista ── */
-  function pintarLista() {
-    var cont = $('lista');
+  function escapar(t) {
+    return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  /* ── Filtros ── */
+  function esFavorito(p) { return estado.favoritos.indexOf(p.nombre) > -1; }
+
+  function categorias() {
+    var vistas = [];
+    estado.prompts.forEach(function (p) {
+      if (vistas.indexOf(p.categoria) === -1) vistas.push(p.categoria);
+    });
+    return vistas;
+  }
+
+  function coincide(p) {
+    if (estado.categoria === 'favoritos' && !esFavorito(p)) return false;
+    if (estado.categoria !== 'todos' && estado.categoria !== 'favoritos' && p.categoria !== estado.categoria) return false;
+    if (!estado.filtro) return true;
     var q = estado.filtro.toLowerCase();
-    var visibles = estado.prompts.filter(function (p) {
-      if (!q) return true;
-      return (p.nombre + ' ' + p.categoria + ' ' + p.descripcion + ' ' + p.destino).toLowerCase().indexOf(q) > -1;
+    return (p.nombre + ' ' + p.categoria + ' ' + p.descripcion + ' ' + p.destino + ' ' + p.plantilla)
+      .toLowerCase().indexOf(q) > -1;
+  }
+
+  function pintarChips() {
+    var cont = $('chips');
+    cont.innerHTML = '';
+    var opciones = [{ id: 'todos', texto: 'Todos', n: estado.prompts.length }];
+    if (estado.favoritos.length) {
+      opciones.push({
+        id: 'favoritos', texto: '★ Favoritos',
+        n: estado.prompts.filter(esFavorito).length
+      });
+    }
+    categorias().forEach(function (c) {
+      opciones.push({
+        id: c, texto: c,
+        n: estado.prompts.filter(function (p) { return p.categoria === c; }).length
+      });
     });
 
-    $('contador').textContent = visibles.length + (visibles.length === 1 ? ' prompt' : ' prompts');
+    opciones.forEach(function (o) {
+      var b = document.createElement('button');
+      b.className = 'chip rotulo';
+      b.type = 'button';
+      b.setAttribute('aria-pressed', String(estado.categoria === o.id));
+      b.innerHTML = escapar(o.texto) + ' <span class="cuenta">' + o.n + '</span>';
+      b.addEventListener('click', function () {
+        estado.categoria = o.id;
+        pintarChips();
+        pintarLista();
+      });
+      cont.appendChild(b);
+    });
+  }
+
+  /* ── Rejilla ── */
+  function pintarLista() {
+    var cont = $('lista');
+    var visibles = estado.prompts.filter(coincide);
+    var vars = variables(true);
+
+    $('contador').textContent = visibles.length === estado.prompts.length
+      ? estado.prompts.length + ' prompts'
+      : visibles.length + ' de ' + estado.prompts.length + ' prompts';
+
     cont.innerHTML = '';
 
     if (!visibles.length) {
       $('estado').hidden = false;
       $('estado').innerHTML = estado.prompts.length
-        ? 'Ningún prompt coincide con «' + escapar(estado.filtro) + '».'
-        : 'La hoja está vacía. Añade filas en el Sheet y pulsa Recargar.';
+        ? 'Ningún prompt coincide con el filtro.'
+        : 'La hoja no tiene prompts activos. Añade filas y pulsa <b>Recargar</b>.';
       return;
     }
     $('estado').hidden = true;
 
-    var categoriaActual = null;
-    var grupo = null;
+    var agrupar = estado.categoria === 'todos' && !estado.filtro;
 
-    visibles.forEach(function (p) {
-      if (p.categoria !== categoriaActual) {
-        categoriaActual = p.categoria;
-        var h = document.createElement('div');
-        h.className = 'cat';
-        h.textContent = p.categoria;
-        cont.appendChild(h);
-        grupo = document.createElement('div');
-        grupo.className = 'tarjetas';
-        cont.appendChild(grupo);
-      }
+    if (!agrupar) {
+      var rejilla = document.createElement('div');
+      rejilla.className = 'rejilla';
+      visibles.forEach(function (p) { rejilla.appendChild(ficha(p, vars, false)); });
+      cont.appendChild(rejilla);
+      return;
+    }
 
-      var card = document.createElement('article');
-      card.className = 'tarjeta';
-      card.innerHTML =
-        (p.destino ? '<span class="badge">' + escapar(p.destino) + '</span>' : '') +
-        '<h3>' + escapar(p.nombre) + '</h3>' +
-        '<p>' + escapar(p.descripcion || '') + '</p>' +
-        '<div class="acciones">' +
-        '  <button class="btn" data-accion="copiar">Copiar</button>' +
-        '  <button class="btn-sec" data-accion="ver">Ver</button>' +
-        '</div>';
+    categorias().forEach(function (c) {
+      var delGrupo = visibles.filter(function (p) { return p.categoria === c; });
+      if (!delGrupo.length) return;
 
-      card.querySelector('[data-accion="copiar"]').addEventListener('click', function (ev) {
-        alCopiar(p, ev.currentTarget);
-      });
-      card.querySelector('[data-accion="ver"]').addEventListener('click', function () {
-        abrirModal(p);
-      });
+      var grupo = document.createElement('section');
+      grupo.className = 'grupo';
+      var cab = document.createElement('div');
+      cab.className = 'grupo-cab';
+      cab.innerHTML = '<h2>' + escapar(c) + '</h2><span class="marcador">' + delGrupo.length + '</span>';
+      grupo.appendChild(cab);
 
-      grupo.appendChild(card);
+      var r = document.createElement('div');
+      r.className = 'rejilla';
+      delGrupo.forEach(function (p) { r.appendChild(ficha(p, vars, true)); });
+      grupo.appendChild(r);
+      cont.appendChild(grupo);
     });
   }
 
-  function escapar(t) {
-    return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  function ficha(p, vars, agrupado) {
+    var completo = rellenar(p.plantilla, vars);
+    var n = palabras(completo);
+    // En 4 líneas de tarjeta no caben renglones vacíos: se enseñan las 4 primeras con contenido.
+    var muestra = completo.split('\n').filter(function (l) { return l.trim(); }).slice(0, 4).join('\n');
+
+    var el = document.createElement('article');
+    el.className = 'ficha';
+    el.innerHTML =
+      '<div class="ficha-cab">' +
+      '  <span class="ficha-cat rotulo">' + escapar(agrupado ? (p.destino || 'Prompt') : p.categoria) + '</span>' +
+      '  <button class="estrella" type="button" aria-pressed="' + esFavorito(p) + '" title="Marcar como favorito">' +
+         (esFavorito(p) ? '★' : '☆') + '</button>' +
+      '</div>' +
+      '<h3>' + escapar(p.nombre) + '</h3>' +
+      (p.descripcion ? '<p class="resumen">' + escapar(p.descripcion) + '</p>' : '') +
+      '<pre class="muestra">' + escapar(muestra) + '</pre>' +
+      '<div class="ficha-pie">' +
+      '  <span class="medida">≈' + n + ' palabras' +
+           (!agrupado && p.destino ? ' · ' + escapar(p.destino) : '') + '</span>' +
+      '  <button class="btn-plano" type="button" data-accion="ver">Ver</button>' +
+      '  <button class="btn" type="button" data-accion="copiar">Copiar</button>' +
+      '</div>';
+
+    el.querySelector('.estrella').addEventListener('click', function (ev) {
+      var i = estado.favoritos.indexOf(p.nombre);
+      i > -1 ? estado.favoritos.splice(i, 1) : estado.favoritos.push(p.nombre);
+      guardar();
+      ev.currentTarget.textContent = esFavorito(p) ? '★' : '☆';
+      ev.currentTarget.setAttribute('aria-pressed', String(esFavorito(p)));
+      pintarChips();
+      if (estado.categoria === 'favoritos') pintarLista();
     });
+    el.querySelector('[data-accion="ver"]').addEventListener('click', function () { abrirModal(p); });
+    el.querySelector('[data-accion="copiar"]').addEventListener('click', function (ev) { alCopiar(p, ev.currentTarget); });
+
+    return el;
   }
 
   /* ── Acciones ── */
@@ -194,6 +280,7 @@
     if ($('producto').value.trim()) return false;
     $('producto').classList.add('falta');
     $('producto').focus();
+    $('producto').scrollIntoView({ block: 'center', behavior: 'smooth' });
     toast('Escribe primero el nombre del producto', true);
     setTimeout(function () { $('producto').classList.remove('falta'); }, 1800);
     return true;
@@ -203,48 +290,46 @@
     if (faltaProducto()) return;
     var texto = rellenar(p.plantilla, variables());
     copiar(texto).then(function () {
-      var antes = boton.textContent;
       boton.textContent = '✓ Copiado';
       boton.classList.add('hecho');
       setTimeout(function () {
-        boton.textContent = antes;
+        boton.textContent = 'Copiar';
         boton.classList.remove('hecho');
       }, 1600);
-      toast('Prompt copiado (' + texto.length + ' caracteres)');
+      toast('Prompt copiado · ' + palabras(texto) + ' palabras');
     }).catch(function () {
       abrirModal(p, true);
-      toast('Tu navegador bloqueó el portapapeles: copia desde aquí', true);
+      toast('El navegador bloqueó el portapapeles: copia desde aquí', true);
     });
   }
 
   function abrirModal(p, seleccionar) {
     if (faltaProducto()) return;
-    estado.promptActual = p;
+    var texto = rellenar(p.plantilla, variables());
     $('dlgTitulo').textContent = p.nombre;
-    $('dlgTexto').value = rellenar(p.plantilla, variables());
+    $('dlgTexto').value = texto;
+    $('dlgMedida').textContent = p.categoria + ' · ≈' + palabras(texto) + ' palabras · ' + texto.length + ' caracteres';
     $('modal').showModal();
-    if (seleccionar) {
-      $('dlgTexto').focus();
-      $('dlgTexto').select();
-    }
+    if (seleccionar) { $('dlgTexto').focus(); $('dlgTexto').select(); }
   }
 
-  function pintarMeta(datos) {
+  function pintarLectura(datos) {
     estado.meta = datos || {};
     $('mTitulo').value = datos.titulo || '';
     $('mDescripcion').value = datos.descripcion || '';
     $('mPrecio').value = datos.precio || '';
-    $('metaSitio').textContent = datos.sitio || 'la página';
-    $('meta').hidden = false;
+    $('metaSitio').textContent = datos.sitio || '';
+    $('lectura').hidden = false;
   }
 
   function leerUrl() {
     var url = $('url').value.trim();
     $('avisoUrl').hidden = true;
     if (!url) {
-      $('meta').hidden = true;
+      $('lectura').hidden = true;
       estado.meta = {};
       guardar();
+      pintarLista();
       return;
     }
 
@@ -254,16 +339,17 @@
 
     api('leerUrl', url).then(function (r) {
       if (r.ok) {
-        pintarMeta(r);
+        pintarLectura(r);
         toast('Datos leídos de ' + (r.sitio || 'la página'));
       } else {
-        pintarMeta({ sitio: r.sitio || '', titulo: '', descripcion: '', precio: '' });
-        $('avisoUrl').textContent = r.error + ' La URL sigue funcionando en los prompts.';
+        pintarLectura({ sitio: r.sitio || '', titulo: '', descripcion: '', precio: '' });
+        $('avisoUrl').textContent = r.error + ' La URL se sigue insertando en los prompts.';
         $('avisoUrl').hidden = false;
       }
       guardar();
+      pintarLista();
     }).catch(function (e) {
-      $('avisoUrl').textContent = 'Error al leer la URL: ' + (e.message || e);
+      $('avisoUrl').textContent = 'Error al leer la URL: ' + ((e && e.message) || e);
       $('avisoUrl').hidden = false;
     }).then(function () {
       b.disabled = false;
@@ -276,6 +362,9 @@
     $('estado').textContent = forzar ? 'Recargando…' : 'Cargando prompts…';
     return api('getPrompts', !!forzar).then(function (lista) {
       estado.prompts = lista || [];
+      $('lema').textContent = estado.prompts.length +
+        ' plantillas que se rellenan solas con el producto y la URL.';
+      pintarChips();
       pintarLista();
     }).catch(function (e) {
       var msg = (e && e.message) || String(e);
@@ -290,6 +379,7 @@
   function iniciar() {
     restaurar();
 
+    var reloj;
     ['producto', 'url', 'extra', 'mTitulo', 'mDescripcion', 'mPrecio'].forEach(function (id) {
       $(id).addEventListener('input', function () {
         estado.meta = {
@@ -299,6 +389,8 @@
           sitio: $('metaSitio').textContent
         };
         guardar();
+        clearTimeout(reloj);
+        reloj = setTimeout(pintarLista, 280);
       });
     });
 
@@ -313,9 +405,7 @@
     });
 
     $('btnRecargar').addEventListener('click', function () { cargarPrompts(true); });
-
     $('dlgCerrar').addEventListener('click', function () { $('modal').close(); });
-    $('dlgCerrar2').addEventListener('click', function () { $('modal').close(); });
     $('dlgCopiar').addEventListener('click', function () {
       copiar($('dlgTexto').value).then(function () {
         toast('Prompt copiado');
@@ -328,7 +418,7 @@
     });
 
     document.addEventListener('keydown', function (e) {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         $('buscar').focus();
       }
@@ -339,7 +429,7 @@
         $('linkHoja').href = s.hojaUrl;
         $('linkHoja').hidden = false;
       }
-    }).catch(function () { /* sin link, no pasa nada */ });
+    }).catch(function () { /* sin enlace, no pasa nada */ });
 
     cargarPrompts(false);
   }

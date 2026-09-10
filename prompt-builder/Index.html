@@ -9,57 +9,73 @@
 </head>
 <body>
 
-  <header class="top">
-    <div class="top-in">
-      <div class="marca">
-        <span class="punto"></span>
-        <h1>Asistente de Prompts</h1>
-        <a id="linkHoja" class="fantasma" target="_blank" rel="noopener" hidden>Editar prompts ↗</a>
-        <button id="btnRecargar" class="fantasma" title="Volver a leer el Sheet">↻ Recargar</button>
+  <div class="banda">
+    <div class="banda-in">
+      <div class="cabecera">
+        <span class="logotipo">Asistente de Prompts</span>
+        <span class="lema" id="lema">Escribe el producto, pega la URL y copia el prompt ya armado.</span>
+        <span class="cabecera-fin">
+          <a id="linkHoja" class="enlace" target="_blank" rel="noopener" hidden>Editar en Sheets ↗</a>
+          <button id="btnRecargar" class="enlace" title="Volver a leer la hoja">Recargar</button>
+        </span>
       </div>
 
       <div class="campos">
         <label class="campo">
-          <span>Producto <b>*</b></span>
-          <input id="producto" autocomplete="off" placeholder="Cafetera de goteo Cecotec Coffee 66">
+          <span class="rotulo">Producto <b>*</b></span>
+          <input id="producto" autocomplete="off" placeholder="Silla Ergonómica Pro Comfort Mesh">
         </label>
-        <label class="campo campo-url">
-          <span>URL de referencia</span>
-          <div class="fila-url">
+        <label class="campo">
+          <span class="rotulo">URL de referencia</span>
+          <span class="fila-url">
             <input id="url" type="url" autocomplete="off" placeholder="https://...">
-            <button id="btnLeer" class="btn-sec">Leer URL</button>
-          </div>
+            <button id="btnLeer" class="btn-banda">Leer URL</button>
+          </span>
         </label>
       </div>
 
-      <div id="meta" class="meta" hidden>
-        <div class="meta-cab">
-          <strong>Datos leídos de <span id="metaSitio">la página</span></strong>
-          <span>· edítalos si vienen mal, se usan tal cual</span>
+      <div id="lectura" class="lectura" hidden>
+        <div class="lectura-cab">
+          <span class="rotulo">Datos leídos</span>
+          <span class="fuente" id="metaSitio"></span>
+          <span>edítalos si vienen mal: se usan tal cual en los prompts</span>
         </div>
-        <div class="meta-grid">
-          <label class="campo"><span>Título</span><input id="mTitulo" autocomplete="off"></label>
-          <label class="campo"><span>Descripción</span><input id="mDescripcion" autocomplete="off"></label>
-          <label class="campo"><span>Precio</span><input id="mPrecio" autocomplete="off"></label>
+        <div class="lectura-grid">
+          <label class="campo">
+            <span class="rotulo">Título</span>
+            <input id="mTitulo" autocomplete="off">
+          </label>
+          <label class="campo">
+            <span class="rotulo">Descripción</span>
+            <input id="mDescripcion" autocomplete="off">
+          </label>
+          <label class="campo">
+            <span class="rotulo">Precio</span>
+            <input id="mPrecio" autocomplete="off">
+          </label>
         </div>
       </div>
 
       <div id="avisoUrl" class="aviso" hidden></div>
 
-      <details class="extra">
-        <summary>Notas extra</summary>
+      <details class="notas">
+        <summary>Notas extra: contexto que se mete en todos los prompts</summary>
         <label class="campo">
-          <textarea id="extra" placeholder="Contexto que quieras meter en todos los prompts: público, ángulo, restricciones..."></textarea>
+          <textarea id="extra" placeholder="Público objetivo, ángulo que quieres, restricciones, lo que ya probaste..."></textarea>
         </label>
       </details>
     </div>
-  </header>
+  </div>
 
   <main>
-    <div class="barra">
-      <input id="buscar" type="search" placeholder="Buscar prompt por nombre o categoría...">
-      <span id="contador"></span>
+    <div class="filtros">
+      <div class="chips" id="chips" role="group" aria-label="Filtrar por categoría"></div>
+      <span class="buscador">
+        <input id="buscar" type="search" placeholder="Buscar prompt…" aria-label="Buscar prompt">
+      </span>
+      <span class="marcador" id="contador"></span>
     </div>
+
     <div id="lista"></div>
     <div id="estado" class="estado">Cargando prompts…</div>
   </main>
@@ -67,14 +83,14 @@
   <dialog id="modal">
     <div class="dlg-cab">
       <h2 id="dlgTitulo">Vista previa</h2>
-      <button id="dlgCerrar" class="fantasma">✕</button>
+      <button id="dlgCerrar" class="btn-plano" aria-label="Cerrar">Cerrar</button>
     </div>
     <div class="dlg-cuerpo">
-      <textarea id="dlgTexto" spellcheck="false"></textarea>
+      <textarea id="dlgTexto" spellcheck="false" aria-label="Prompt generado"></textarea>
     </div>
     <div class="dlg-pie">
-      <button id="dlgCerrar2" class="btn-sec">Cerrar</button>
-      <button id="dlgCopiar" class="btn">Copiar</button>
+      <span class="medida" id="dlgMedida"></span>
+      <button id="dlgCopiar" class="btn">Copiar prompt</button>
     </div>
   </dialog>
 

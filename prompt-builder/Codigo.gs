@@ -109,7 +109,7 @@ const VARIABLES_DOC = [
   ['{{fecha}}', 'Fecha de hoy (AAAA-MM-DD).'],
   ['REGLA', 'Si una línea contiene SOLO variables vacías, la app borra esa línea entera al armar el prompt. Así no quedan etiquetas huérfanas tipo "Precio:" sin valor. Pon cada dato opcional en su propia línea.'],
   ['activo', 'Casilla desmarcada = ese prompt no aparece en la app.'],
-  ['orden', 'Número. Ordena los prompts dentro de su categoría.'],
+  ['orden', 'Número. Ordena los prompts dentro de su categoría. Las categorías salen en el orden en que aparecen en la hoja.'],
   ['destino', 'Etiqueta libre (ChatGPT, Claude, Midjourney...). Solo se muestra como badge.']
 ];
 
@@ -170,9 +170,15 @@ function getPrompts(forzarRecarga) {
     });
   }
 
+  // El orden de las categorías es el de aparición en la hoja: mover una fila
+  // reordena la sección entera, que es lo que uno espera al editar el Sheet.
+  const ordenCategoria = {};
+  prompts.forEach(function (p, i) {
+    if (!(p.categoria in ordenCategoria)) ordenCategoria[p.categoria] = i;
+  });
   prompts.sort(function (a, b) {
-    if (a.categoria === b.categoria) return a.orden - b.orden;
-    return a.categoria.localeCompare(b.categoria, 'es');
+    if (a.categoria !== b.categoria) return ordenCategoria[a.categoria] - ordenCategoria[b.categoria];
+    return a.orden - b.orden;
   });
 
   cache.put('prompts', JSON.stringify(prompts), CONFIG.CACHE_PROMPTS_SEG);
@@ -322,114 +328,5 @@ function limpiar(texto) {
     .trim();
 }
 
-/* ─────────────────────── Prompts de ejemplo ─────────────────────────── */
-
-function plantillasDeEjemplo() {
-  return [
-    [true, 'Pinterest', 'Títulos de pin (5 variantes)', 'Cinco títulos con la keyword al inicio, sin lenguaje de folleto.', 'ChatGPT',
-      [
-        'Escribe 5 títulos de pin de Pinterest para este producto:',
-        '',
-        'Producto: {{producto}}',
-        'Página: {{url}}',
-        'Título de la página: {{titulo}}',
-        'Descripción: {{descripcion}}',
-        'Precio: {{precio}}',
-        'Notas: {{extra}}',
-        '',
-        'Reglas:',
-        '- Máximo 40 caracteres cada uno.',
-        '- La palabra clave principal va al principio, no al final.',
-        '- Nada de "descubre", "transforma", "eleva", "revoluciona".',
-        '- Prohibido el molde "Verbo: producto" (nada de "Ahorra tiempo: la cafetera X").',
-        '- Que se lean como algo que escribiría una persona buscando eso en Google.',
-        '',
-        'Devuélvelos en lista numerada, sin explicaciones.'
-      ].join('\n'), 1],
-
-    [true, 'Pinterest', 'Descripción de pin + hashtags', 'Descripción de 2 frases orientada a búsqueda.', 'ChatGPT',
-      [
-        'Escribe la descripción de un pin de Pinterest para: {{producto}}',
-        '',
-        'Datos de la página ({{sitio}}):',
-        'Título: {{titulo}}',
-        'Descripción: {{descripcion}}',
-        'Precio: {{precio}}',
-        'URL: {{url}}',
-        'Notas: {{extra}}',
-        '',
-        'Formato: 2 frases (máx. 180 caracteres en total) + 4 hashtags al final.',
-        'La primera frase tiene que contener la búsqueda real que haría alguien interesado.',
-        'Tono directo, sin adjetivos de catálogo. Español neutro.'
-      ].join('\n'), 2],
-
-    [true, 'Contenido', 'Esqueleto de reseña', 'Estructura de artículo de reseña con secciones y ángulos.', 'Claude',
-      [
-        'Necesito el esqueleto de una reseña honesta de: {{producto}}',
-        '',
-        'Fuente: {{url}}',
-        'Título de la página: {{titulo}}',
-        'Descripción oficial: {{descripcion}}',
-        'Precio: {{precio}}',
-        'Contexto extra: {{extra}}',
-        '',
-        'Dame:',
-        '1. Tres ángulos posibles para el artículo, y cuál elegirías tú y por qué.',
-        '2. El H1 y los H2 del ángulo ganador.',
-        '3. Para cada H2, una frase con lo que va dentro.',
-        '4. Las 3 objeciones que tendría alguien antes de comprarlo.',
-        '5. Qué datos me faltan y tendría que verificar por mi cuenta.',
-        '',
-        'No escribas todavía el artículo.'
-      ].join('\n'), 1],
-
-    [true, 'Contenido', 'Ficha comparativa', 'Tabla pros/contras y para quién sí y para quién no.', 'Claude',
-      [
-        'Analiza este producto y dame una ficha de decisión:',
-        '',
-        'Producto: {{producto}}',
-        'URL: {{url}}',
-        'Título: {{titulo}}',
-        'Descripción: {{descripcion}}',
-        'Precio: {{precio}}',
-        '',
-        'Entrega:',
-        '- Tabla de 4 pros y 4 contras concretos (nada de "buena calidad-precio").',
-        '- "Para quién sí" y "para quién no", una frase cada uno.',
-        '- Dos alternativas directas y en qué gana cada una.',
-        '- Una pega real que la marca no menciona.'
-      ].join('\n'), 2],
-
-    [true, 'Imagen', 'Prompt de imagen para el pin', 'Prompt visual listo para Midjourney o similar.', 'Midjourney',
-      [
-        'Prompt de imagen vertical 2:3 para un pin de Pinterest sobre {{producto}}.',
-        'Referencia visual: {{url}}',
-        'Contexto: {{titulo}}. {{descripcion}}',
-        'Notas: {{extra}}',
-        '',
-        'Descríbeme la escena en inglés, en una sola línea: sujeto, entorno, luz, paleta, ángulo de cámara y espacio libre arriba para el texto.',
-        'Sin texto ni logos dentro de la imagen. Estilo fotografía real, no ilustración 3D.'
-      ].join('\n'), 1],
-
-    [true, 'Email', 'Correo de recomendación', 'Email corto a la lista recomendando el producto.', 'ChatGPT',
-      [
-        'Escribe un correo corto para mi lista recomendando: {{producto}}',
-        '',
-        'Enlace: {{url}}',
-        'Datos: {{titulo}} — {{descripcion}}',
-        'Precio: {{precio}}',
-        'Contexto mío: {{extra}}',
-        '',
-        'Estructura: asunto (máx. 45 caracteres, sin emoji), 120-160 palabras, un solo enlace, cierre con una pregunta.',
-        'Empieza contando cuándo lo usé o para qué lo busqué, no con la ficha técnica.',
-        'Sin "espero que estés bien", sin listas de beneficios, sin urgencia falsa.'
-      ].join('\n'), 1],
-
-    [false, 'Email', 'Secuencia de 3 correos', 'Desactivado: ejemplo de prompt apagado con la casilla.', 'ChatGPT',
-      [
-        'Secuencia de 3 correos para {{producto}} ({{url}}).',
-        'Correo 1: el problema. Correo 2: cómo lo resuelve. Correo 3: la oferta y el cierre.',
-        'Notas: {{extra}}'
-      ].join('\n'), 2]
-  ];
-}
+/* La biblioteca de ejemplo vive en Semilla.gs, generado por build.py
+   a partir de prompts-semilla.json. No la edites a mano ahí. */

@@ -1,398 +1,656 @@
 <title>Asistente de Prompts</title>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@600&display=swap">
 <style>
-  /* Paleta heredada de la landing (index.html): navy + crema + terracota */
+  /* ───────────────────────────── Sistema ─────────────────────────────
+     Color:  papel cálido neutro · tinta casi negra · navy institucional
+             heredado del #2E4057 de la marca · terracota quemada como
+             única señal (favoritos, avisos, campo obligatorio).
+     Tipo:   IBM Plex Serif (identidad) · Sans (interfaz) · Mono (prompts).
+     Trazo:  filete de 1px en vez de sombras. Radio 4px. Sin degradados.
+  ──────────────────────────────────────────────────────────────────── */
+
   :root {
-    --navy: #2E4057;
-    --navy-2: #3a5070;
-    --terra: #D3756B;
-    --terra-dark: #bb5f55;
-    --text: #1a1a2e;
-    --muted: #6b7280;
-    --linea: #e2ddd2;
-    --panel: #ffffff;
-    --fondo: #F4F1EA;
-    --ok: #2f7a5b;
-    --badge-bg: rgba(46,64,87,.09);
-    --toast-bg: #2E4057;
-    --toast-fg: #ffffff;
-    --radio: 8px;
-    --sombra: 0 1px 2px rgba(46,64,87,.08), 0 4px 14px rgba(46,64,87,.06);
+    --papel: #F5F4F0;
+    --panel: #FFFFFF;
+    --panel-2: #FAFAF7;
+    --tinta: #12171E;
+    --apagado: #69707C;
+    --tenue: #8A909B;
+    --linea: #E3E1D9;
+    --linea-fuerte: #CBC8BC;
+
+    --marca: #16324F;
+    --senal: #B65B3C;
+    --exito: #1C6B4F;
+
+    --accion-fondo: #16324F;
+    --accion-tinta: #FFFFFF;
+    --accion-hover: #1F4468;
+
+    --banda: #16324F;
+    --banda-tinta: #F0F3F7;
+    --banda-apagado: #9DB0C6;
+    --banda-campo: rgba(255,255,255,.07);
+    --banda-linea: rgba(255,255,255,.17);
+    --banda-linea-fuerte: rgba(255,255,255,.34);
+
+    --chip-fondo: transparent;
+    --chip-activo: #16324F;
+    --chip-activo-tinta: #FFFFFF;
+
+    --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --serif: 'IBM Plex Serif', Georgia, 'Times New Roman', serif;
+    --mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+    --radio: 4px;
+    --ancho: 1180px;
   }
 
-  /* Tema oscuro: por preferencia del sistema... */
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --navy: #dfe4ec;
-      --navy-2: #b9c3d2;
-      --text: #e8e6e1;
-      --muted: #9aa3b2;
-      --linea: #2b323f;
-      --panel: #1b202a;
-      --fondo: #12151b;
-      --badge-bg: rgba(255,255,255,.09);
-      --toast-bg: #e8e6e1;
-      --toast-fg: #12151b;
-      --sombra: 0 1px 2px rgba(0,0,0,.3), 0 4px 14px rgba(0,0,0,.25);
+      --papel: #0C1016;
+      --panel: #131922;
+      --panel-2: #0F151D;
+      --tinta: #E3E6EA;
+      --apagado: #8B929E;
+      --tenue: #6E7684;
+      --linea: #212934;
+      --linea-fuerte: #34404F;
+
+      --marca: #8FB6E4;
+      --senal: #D9825C;
+      --exito: #4FA684;
+
+      --accion-fondo: #2C5C90;
+      --accion-tinta: #FFFFFF;
+      --accion-hover: #376FA9;
+
+      --banda: #0F151D;
+      --banda-tinta: #E3E6EA;
+      --banda-apagado: #7F8896;
+      --banda-campo: rgba(255,255,255,.05);
+      --banda-linea: rgba(255,255,255,.11);
+      --banda-linea-fuerte: rgba(255,255,255,.26);
+
+      --chip-activo: #2C5C90;
+      --chip-activo-tinta: #FFFFFF;
     }
   }
 
-  /* ...y por elección explícita del visor. */
   :root[data-theme="dark"] {
-    --navy: #dfe4ec;
-    --navy-2: #b9c3d2;
-    --text: #e8e6e1;
-    --muted: #9aa3b2;
-    --linea: #2b323f;
-    --panel: #1b202a;
-    --fondo: #12151b;
-    --badge-bg: rgba(255,255,255,.09);
-    --toast-bg: #e8e6e1;
-    --toast-fg: #12151b;
-    --sombra: 0 1px 2px rgba(0,0,0,.3), 0 4px 14px rgba(0,0,0,.25);
+    --papel: #0C1016;
+    --panel: #131922;
+    --panel-2: #0F151D;
+    --tinta: #E3E6EA;
+    --apagado: #8B929E;
+    --tenue: #6E7684;
+    --linea: #212934;
+    --linea-fuerte: #34404F;
+
+    --marca: #8FB6E4;
+    --senal: #D9825C;
+    --exito: #4FA684;
+
+    --accion-fondo: #2C5C90;
+    --accion-tinta: #FFFFFF;
+    --accion-hover: #376FA9;
+
+    --banda: #0F151D;
+    --banda-tinta: #E3E6EA;
+    --banda-apagado: #7F8896;
+    --banda-campo: rgba(255,255,255,.05);
+    --banda-linea: rgba(255,255,255,.11);
+    --banda-linea-fuerte: rgba(255,255,255,.26);
+
+    --chip-activo: #2C5C90;
+    --chip-activo-tinta: #FFFFFF;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    background: var(--fondo);
-    color: var(--text);
-    line-height: 1.55;
-    font-size: 15px;
+    font-family: var(--sans);
+    background: var(--papel);
+    color: var(--tinta);
+    font-size: 14px;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }
 
-  button, input, textarea { font: inherit; color: inherit; }
+  button, input, textarea, select { font: inherit; color: inherit; }
 
-  /* ── Cabecera ── */
-  .top {
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    background: var(--panel);
-    border-bottom: 1px solid var(--linea);
-    box-shadow: var(--sombra);
-  }
-  .top-in { max-width: 1000px; margin: 0 auto; padding: 14px 16px 16px; }
-
-  .marca { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-  .marca h1 {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: var(--navy);
-    letter-spacing: -.01em;
-    flex: 1;
-    min-width: 0;
-  }
-  .punto {
-    width: 10px; height: 10px; border-radius: 50%;
-    background: var(--terra);
-    flex: none;
-  }
-
-  .campos { display: flex; gap: 12px; flex-wrap: wrap; }
-  .campo { display: flex; flex-direction: column; gap: 4px; flex: 1 1 220px; min-width: 0; }
-  .campo-url { flex: 1.4 1 280px; }
-  .campo > span {
-    font-size: .72rem;
+  .rotulo {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .13em;
     text-transform: uppercase;
-    letter-spacing: .06em;
-    color: var(--muted);
-    font-weight: 600;
+    font-family: var(--sans);
   }
-  .campo b { color: var(--terra); }
-  .campo input, .campo textarea {
-    width: 100%;
-    padding: 9px 11px;
-    border: 1px solid var(--linea);
-    border-radius: var(--radio);
-    background: var(--fondo);
-    outline: none;
-    transition: border-color .15s, box-shadow .15s;
-  }
-  .campo input:focus, .campo textarea:focus, #buscar:focus {
-    border-color: var(--terra);
-    box-shadow: 0 0 0 3px rgba(211,117,107,.16);
-  }
-  .campo input.falta { border-color: var(--terra); background: rgba(211,117,107,.08); }
-  .fila-url { display: flex; gap: 8px; }
-  .fila-url input { flex: 1; min-width: 0; }
 
-  /* ── Botones ── */
-  .btn, .btn-sec, .fantasma {
-    border: none;
-    border-radius: var(--radio);
-    cursor: pointer;
+  /* ─────────────────────── Banda de control ─────────────────────── */
+  .banda {
+    background: var(--banda);
+    color: var(--banda-tinta);
+    border-bottom: 1px solid var(--banda-linea-fuerte);
+  }
+  .banda-in { max-width: var(--ancho); margin: 0 auto; padding: 0 24px 18px; }
+
+  .cabecera {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    padding: 16px 0 15px;
+    border-bottom: 1px solid var(--banda-linea);
+    margin-bottom: 16px;
+  }
+  .logotipo {
+    font-family: var(--serif);
+    font-size: 17px;
     font-weight: 600;
-    transition: background .15s, transform .1s, border-color .15s;
+    letter-spacing: -.01em;
     white-space: nowrap;
   }
-  .btn { background: var(--terra); color: #fff; padding: 9px 16px; }
-  .btn:hover { background: var(--terra-dark); }
-  .btn:active { transform: translateY(1px); }
-  .btn-sec {
-    background: transparent;
-    color: var(--navy);
-    border: 1px solid var(--linea);
-    padding: 9px 14px;
+  .lema {
+    color: var(--banda-apagado);
+    font-size: 12px;
+    flex: 1;
+    min-width: 0;
+    border-left: 1px solid var(--banda-linea);
+    padding-left: 14px;
   }
-  .btn-sec:hover { border-color: var(--terra); color: var(--terra); }
-  .fantasma {
-    background: transparent;
-    color: var(--muted);
-    padding: 5px 9px;
-    font-size: .82rem;
+  .cabecera-fin { display: flex; align-items: center; gap: 4px; }
+
+  .enlace {
+    color: var(--banda-apagado);
+    background: none;
     border: 1px solid transparent;
-    text-decoration: none;
-  }
-  .fantasma:hover { color: var(--terra); border-color: var(--linea); }
-  button:disabled { opacity: .5; cursor: progress; }
-
-  /* ── Metadatos extraídos ── */
-  .meta {
-    margin-top: 12px;
-    padding: 12px;
-    border: 1px dashed var(--linea);
     border-radius: var(--radio);
-    background: var(--fondo);
-  }
-  .meta-cab {
-    display: flex; align-items: center; gap: 4px 8px; flex-wrap: wrap;
-    font-size: .74rem; color: var(--muted);
-    margin-bottom: 10px;
-  }
-  .meta-cab strong { color: var(--text); font-size: .8rem; }
-  .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
-  .meta-grid .campo input { background: var(--panel); }
-  .aviso {
-    margin-top: 10px;
-    padding: 9px 11px;
-    border-radius: var(--radio);
-    background: rgba(211,117,107,.12);
-    border: 1px solid rgba(211,117,107,.3);
-    font-size: .84rem;
-  }
-
-  .extra { margin-top: 10px; }
-  .extra summary {
+    padding: 5px 9px;
+    font-size: 12px;
+    font-weight: 500;
     cursor: pointer;
-    font-size: .78rem;
-    color: var(--muted);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color .12s, border-color .12s, background .12s;
+  }
+  .enlace:hover { color: var(--banda-tinta); border-color: var(--banda-linea); }
+
+  .campos { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.35fr); gap: 16px; }
+  .campo { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .campo > .rotulo { color: var(--banda-apagado); }
+  .campo > .rotulo b { color: var(--senal); font-weight: 700; }
+
+  .banda input,
+  .banda textarea {
+    width: 100%;
+    background: var(--banda-campo);
+    border: 1px solid var(--banda-linea);
+    border-radius: var(--radio);
+    color: var(--banda-tinta);
+    padding: 9px 11px;
+    outline: none;
+    transition: border-color .12s, background .12s;
+  }
+  .banda input::placeholder, .banda textarea::placeholder { color: var(--banda-apagado); opacity: .7; }
+  .banda input:focus, .banda textarea:focus {
+    border-color: var(--banda-linea-fuerte);
+    background: rgba(255,255,255,.11);
+  }
+  .banda input.falta { border-color: var(--senal); background: rgba(182,91,60,.18); }
+
+  #producto { font-weight: 600; }
+  .fila-url { display: flex; gap: 8px; }
+  .fila-url input { flex: 1; min-width: 0; font-family: var(--mono); font-size: 12.5px; }
+
+  .btn-banda {
+    background: transparent;
+    border: 1px solid var(--banda-linea-fuerte);
+    color: var(--banda-tinta);
+    border-radius: var(--radio);
+    padding: 0 14px;
+    font-size: 13px;
     font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .12s;
+  }
+  .btn-banda:hover { background: rgba(255,255,255,.1); }
+  .btn-banda:disabled { opacity: .45; cursor: progress; }
+
+  /* Datos leídos de la URL */
+  .lectura {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--banda-linea);
+  }
+  .lectura-cab {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+    color: var(--banda-apagado);
+    font-size: 12px;
+  }
+  .lectura-cab .rotulo { color: var(--banda-tinta); }
+  .lectura-cab .fuente { font-family: var(--mono); font-size: 11.5px; color: var(--banda-tinta); }
+  .lectura-grid { display: grid; grid-template-columns: 1.2fr 1.6fr .6fr; gap: 12px; }
+
+  .aviso {
+    margin-top: 12px;
+    display: flex;
+    gap: 9px;
+    align-items: flex-start;
+    padding: 10px 12px;
+    border-radius: var(--radio);
+    border: 1px solid rgba(217,130,92,.45);
+    background: rgba(182,91,60,.16);
+    font-size: 12.5px;
+    line-height: 1.45;
+  }
+  .aviso::before { content: '!'; font-family: var(--mono); font-weight: 500; color: var(--senal); }
+
+  .notas { margin-top: 12px; }
+  .notas summary {
     list-style: none;
+    cursor: pointer;
+    color: var(--banda-apagado);
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 4px 0;
+    gap: 7px;
+    padding: 3px 0;
   }
-  .extra summary::before { content: '▸'; transition: transform .15s; }
-  .extra[open] summary::before { transform: rotate(90deg); }
-  .extra textarea { margin-top: 6px; resize: vertical; min-height: 62px; }
+  .notas summary::-webkit-details-marker { display: none; }
+  .notas summary::before { content: '+'; font-family: var(--mono); }
+  .notas[open] summary::before { content: '–'; }
+  .notas summary:hover { color: var(--banda-tinta); }
+  .notas textarea { margin-top: 8px; resize: vertical; min-height: 60px; line-height: 1.5; }
 
-  /* ── Lista ── */
-  main { max-width: 1000px; margin: 0 auto; padding: 18px 16px 80px; }
+  /* ─────────────────────────── Taller ──────────────────────────── */
+  main { max-width: var(--ancho); margin: 0 auto; padding: 0 24px 80px; }
 
-  .barra { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; }
-  #buscar {
-    flex: 1;
-    padding: 9px 12px;
-    border: 1px solid var(--linea);
-    border-radius: var(--radio);
-    background: var(--panel);
-    outline: none;
-  }
-  #contador { font-size: .78rem; color: var(--muted); white-space: nowrap; }
-
-  .cat {
-    font-size: .72rem;
-    text-transform: uppercase;
-    letter-spacing: .09em;
-    color: var(--muted);
-    font-weight: 700;
-    margin: 22px 0 10px;
+  .filtros {
+    position: sticky;
+    top: 0;
+    z-index: 10;
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-wrap: wrap;
+    padding: 14px 0 13px;
+    margin-bottom: 20px;
+    background: var(--papel);
+    border-bottom: 1px solid var(--linea);
   }
-  .cat::after { content: ''; flex: 1; height: 1px; background: var(--linea); }
-  .cat:first-child { margin-top: 0; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; min-width: 0; }
 
-  .tarjetas { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--chip-fondo);
+    border: 1px solid var(--linea-fuerte);
+    border-radius: var(--radio);
+    color: var(--apagado);
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: color .12s, background .12s, border-color .12s;
+  }
+  .chip:hover { color: var(--tinta); border-color: var(--tinta); }
+  .chip[aria-pressed="true"] {
+    background: var(--chip-activo);
+    border-color: var(--chip-activo);
+    color: var(--chip-activo-tinta);
+  }
+  .chip .cuenta {
+    font-family: var(--mono);
+    font-size: 10px;
+    opacity: .65;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
 
-  .tarjeta {
+  .buscador { position: relative; }
+  .buscador input {
+    width: 230px;
+    max-width: 100%;
+    background: var(--panel);
+    border: 1px solid var(--linea-fuerte);
+    border-radius: var(--radio);
+    padding: 6px 10px 6px 28px;
+    outline: none;
+    font-size: 13px;
+    transition: border-color .12s;
+  }
+  .buscador input:focus { border-color: var(--marca); }
+  .buscador::before {
+    content: '⌕';
+    position: absolute;
+    left: 9px; top: 50%;
+    transform: translateY(-52%);
+    color: var(--tenue);
+    font-size: 15px;
+    pointer-events: none;
+  }
+  .marcador {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--tenue);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Rejilla de prompts */
+  .rejilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 12px; }
+
+  .ficha {
     background: var(--panel);
     border: 1px solid var(--linea);
     border-radius: var(--radio);
-    padding: 14px;
+    padding: 15px 15px 13px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    box-shadow: var(--sombra);
-    transition: border-color .15s, transform .1s;
+    gap: 10px;
+    transition: background .12s;
   }
-  .tarjeta:hover { border-color: var(--terra); }
-  .tarjeta h3 { font-size: .95rem; color: var(--navy); line-height: 1.35; }
-  .tarjeta p { font-size: .83rem; color: var(--muted); flex: 1; }
-  .badge {
-    display: inline-block;
-    align-self: flex-start;
-    font-size: .66rem;
-    text-transform: uppercase;
-    letter-spacing: .05em;
-    font-weight: 700;
-    padding: 2px 7px;
-    border-radius: 99px;
-    background: var(--badge-bg);
-    color: var(--navy-2);
-  }
-  .acciones { display: flex; gap: 8px; margin-top: 4px; }
-  .acciones .btn { flex: 1; text-align: center; }
-  .acciones .btn.hecho { background: var(--ok); }
+  .ficha:hover { border-color: var(--linea-fuerte); }
 
-  .estado { text-align: center; padding: 40px 16px; color: var(--muted); }
+  .ficha-cab { display: flex; align-items: flex-start; gap: 10px; }
+  .ficha-cat { color: var(--apagado); flex: 1; min-width: 0; padding-top: 2px; }
+  .estrella {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--linea-fuerte);
+    font-size: 15px;
+    line-height: 1;
+    padding: 2px;
+    transition: color .12s, transform .12s;
+  }
+  .estrella:hover { color: var(--senal); transform: scale(1.15); }
+  .estrella[aria-pressed="true"] { color: var(--senal); }
+
+  .ficha h3 {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -.005em;
+    text-wrap: balance;
+  }
+  .ficha .resumen { font-size: 12.5px; color: var(--apagado); line-height: 1.45; }
+
+  .muestra {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    line-height: 1.55;
+    color: var(--apagado);
+    background: var(--panel-2);
+    border: 1px solid var(--linea);
+    border-left: 2px solid var(--linea-fuerte);
+    border-radius: 0 var(--radio) var(--radio) 0;
+    padding: 9px 10px;
+    white-space: pre-wrap;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    max-height: 5.4em;
+    flex: 1;
+  }
+  .muestra mark { background: rgba(182,91,60,.2); color: inherit; border-radius: 2px; padding: 0 1px; }
+
+  .ficha-pie {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-top: 11px;
+    border-top: 1px solid var(--linea);
+    margin-top: 2px;
+  }
+  .medida {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--tenue);
+    flex: 1;
+    min-width: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .btn {
+    background: var(--accion-fondo);
+    color: var(--accion-tinta);
+    border: 1px solid var(--accion-fondo);
+    border-radius: var(--radio);
+    padding: 6px 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .12s, border-color .12s;
+  }
+  .btn:hover { background: var(--accion-hover); border-color: var(--accion-hover); }
+  .btn.hecho { background: var(--exito); border-color: var(--exito); }
+
+  .btn-plano {
+    background: transparent;
+    border: 1px solid var(--linea-fuerte);
+    border-radius: var(--radio);
+    color: var(--apagado);
+    padding: 6px 12px;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color .12s, border-color .12s;
+  }
+  .btn-plano:hover { color: var(--tinta); border-color: var(--tinta); }
+
+  .grupo { margin-bottom: 30px; }
+  .grupo-cab {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .grupo-cab h2 {
+    font-family: var(--serif);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -.01em;
+  }
+  .grupo-cab .marcador { flex: none; }
+  .grupo-cab::after { content: ''; flex: 1; height: 1px; background: var(--linea); }
+
+  .estado {
+    text-align: center;
+    padding: 56px 16px;
+    color: var(--apagado);
+    border: 1px dashed var(--linea-fuerte);
+    border-radius: var(--radio);
+    line-height: 1.6;
+  }
   .estado code {
-    font-family: 'Courier New', monospace;
+    font-family: var(--mono);
+    font-size: 12.5px;
     background: var(--panel);
     border: 1px solid var(--linea);
     padding: 2px 6px;
-    border-radius: 4px;
+    border-radius: 3px;
   }
-  .estado .btn { margin-top: 14px; }
 
-  /* ── Vista previa ── */
+  /* ───────────────────────── Vista completa ────────────────────── */
   dialog {
-    border: none;
-    border-radius: 12px;
+    border: 1px solid var(--linea-fuerte);
+    border-radius: var(--radio);
     padding: 0;
-    width: min(720px, 92vw);
+    width: min(760px, 94vw);
     background: var(--panel);
-    color: var(--text);
-    box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    color: var(--tinta);
   }
-  dialog::backdrop { background: rgba(26,26,46,.55); }
+  dialog::backdrop { background: rgba(10,14,20,.6); }
   .dlg-cab {
-    display: flex; align-items: center; gap: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
     padding: 14px 16px;
     border-bottom: 1px solid var(--linea);
   }
-  .dlg-cab h2 { font-size: .95rem; color: var(--navy); flex: 1; }
-  .dlg-cuerpo { padding: 16px; }
+  .dlg-cab h2 { font-size: 14.5px; font-weight: 600; flex: 1; min-width: 0; }
+  .dlg-cuerpo { padding: 14px 16px; }
   .dlg-cuerpo textarea {
     width: 100%;
-    min-height: 46vh;
+    min-height: 48vh;
     border: 1px solid var(--linea);
     border-radius: var(--radio);
-    background: var(--fondo);
-    padding: 12px;
-    font-family: 'Courier New', monospace;
-    font-size: .84rem;
-    line-height: 1.55;
+    background: var(--panel-2);
+    padding: 13px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.6;
     resize: vertical;
     outline: none;
   }
-  .dlg-pie { display: flex; gap: 8px; justify-content: flex-end; padding: 0 16px 16px; }
+  .dlg-cuerpo textarea:focus { border-color: var(--marca); }
+  .dlg-pie {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 16px 16px;
+  }
 
-  /* ── Toast ── */
+
+  /* ───────────────────────────── Aviso flotante ─────────────────── */
   #toast {
     position: fixed;
     left: 50%;
-    bottom: 24px;
-    transform: translate(-50%, 20px);
-    background: var(--toast-bg);
-    color: var(--toast-fg);
+    bottom: 26px;
+    transform: translate(-50%, 14px);
+    background: var(--tinta);
+    color: var(--papel);
     padding: 10px 18px;
-    border-radius: 99px;
-    font-size: .86rem;
-    font-weight: 600;
+    border-radius: var(--radio);
+    font-size: 13px;
+    font-weight: 500;
     opacity: 0;
     pointer-events: none;
-    transition: opacity .2s, transform .2s;
-    z-index: 50;
-    max-width: 90vw;
+    transition: opacity .16s, transform .16s;
+    z-index: 60;
+    max-width: 92vw;
     text-align: center;
   }
   #toast.ver { opacity: 1; transform: translate(-50%, 0); }
-  #toast.malo { background: var(--terra-dark); }
+  #toast.malo { background: var(--senal); color: #fff; }
 
   :where(button, a, input, textarea, summary):focus-visible {
-    outline: 2px solid var(--terra);
+    outline: 2px solid var(--senal);
     outline-offset: 2px;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      transition-duration: .01ms !important;
-      animation-duration: .01ms !important;
-    }
+    *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
   }
 
-  @media (max-width: 560px) {
-    /* En columna, flex-basis mide alto: hay que anularlo o los campos se inflan */
-    .campos { flex-direction: column; gap: 10px; }
-    .campos > .campo, .campo-url { flex: 0 0 auto; width: 100%; }
+  @media (max-width: 900px) {
+    .lectura-grid { grid-template-columns: 1fr 1fr; }
+    .lectura-grid .campo:last-child { grid-column: span 2; }
+  }
 
-    .marca { flex-wrap: wrap; row-gap: 6px; }
-    .marca h1 { flex: 1 0 auto; white-space: nowrap; font-size: 1rem; }
-    .fantasma { font-size: .76rem; padding: 4px 7px; }
-
-    .tarjetas { grid-template-columns: 1fr; }
-    .barra { flex-wrap: wrap; }
-    .dlg-cuerpo textarea { min-height: 40vh; }
+  @media (max-width: 660px) {
+    .banda-in, main { padding-left: 16px; padding-right: 16px; }
+    .cabecera { flex-wrap: wrap; row-gap: 8px; }
+    .lema { flex-basis: 100%; border-left: none; padding-left: 0; }
+    .campos { grid-template-columns: 1fr; gap: 12px; }
+    .lectura-grid { grid-template-columns: 1fr; }
+    .lectura-grid .campo:last-child { grid-column: auto; }
+    .rejilla { grid-template-columns: 1fr; }
+    .buscador input { width: 100%; }
+    .buscador { flex: 1; min-width: 140px; }
+    /* En móvil los chips se leen mejor en una tira que se desliza que apilados */
+    .chips {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
+      flex-basis: 100%;
+      padding-bottom: 2px;
+      margin: 0 -16px;
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+    .chips::-webkit-scrollbar { display: none; }
+    .chip { flex: none; white-space: nowrap; }
+    .dlg-cuerpo textarea { min-height: 42vh; }
   }
 </style>
 
-<header class="top">
-    <div class="top-in">
-      <div class="marca">
-        <span class="punto"></span>
-        <h1>Asistente de Prompts</h1>
-        <a id="linkHoja" class="fantasma" target="_blank" rel="noopener" hidden>Editar prompts ↗</a>
-        <button id="btnRecargar" class="fantasma" title="Volver a leer el Sheet">↻ Recargar</button>
+<div class="banda">
+    <div class="banda-in">
+      <div class="cabecera">
+        <span class="logotipo">Asistente de Prompts</span>
+        <span class="lema" id="lema">Escribe el producto, pega la URL y copia el prompt ya armado.</span>
+        <span class="cabecera-fin">
+          <a id="linkHoja" class="enlace" target="_blank" rel="noopener" hidden>Editar en Sheets ↗</a>
+          <button id="btnRecargar" class="enlace" title="Volver a leer la hoja">Recargar</button>
+        </span>
       </div>
 
       <div class="campos">
         <label class="campo">
-          <span>Producto <b>*</b></span>
-          <input id="producto" autocomplete="off" placeholder="Cafetera de goteo Cecotec Coffee 66">
+          <span class="rotulo">Producto <b>*</b></span>
+          <input id="producto" autocomplete="off" placeholder="Silla Ergonómica Pro Comfort Mesh">
         </label>
-        <label class="campo campo-url">
-          <span>URL de referencia</span>
-          <div class="fila-url">
+        <label class="campo">
+          <span class="rotulo">URL de referencia</span>
+          <span class="fila-url">
             <input id="url" type="url" autocomplete="off" placeholder="https://...">
-            <button id="btnLeer" class="btn-sec">Leer URL</button>
-          </div>
+            <button id="btnLeer" class="btn-banda">Leer URL</button>
+          </span>
         </label>
       </div>
 
-      <div id="meta" class="meta" hidden>
-        <div class="meta-cab">
-          <strong>Datos leídos de <span id="metaSitio">la página</span></strong>
-          <span>· edítalos si vienen mal, se usan tal cual</span>
+      <div id="lectura" class="lectura" hidden>
+        <div class="lectura-cab">
+          <span class="rotulo">Datos leídos</span>
+          <span class="fuente" id="metaSitio"></span>
+          <span>edítalos si vienen mal: se usan tal cual en los prompts</span>
         </div>
-        <div class="meta-grid">
-          <label class="campo"><span>Título</span><input id="mTitulo" autocomplete="off"></label>
-          <label class="campo"><span>Descripción</span><input id="mDescripcion" autocomplete="off"></label>
-          <label class="campo"><span>Precio</span><input id="mPrecio" autocomplete="off"></label>
+        <div class="lectura-grid">
+          <label class="campo">
+            <span class="rotulo">Título</span>
+            <input id="mTitulo" autocomplete="off">
+          </label>
+          <label class="campo">
+            <span class="rotulo">Descripción</span>
+            <input id="mDescripcion" autocomplete="off">
+          </label>
+          <label class="campo">
+            <span class="rotulo">Precio</span>
+            <input id="mPrecio" autocomplete="off">
+          </label>
         </div>
       </div>
 
       <div id="avisoUrl" class="aviso" hidden></div>
 
-      <details class="extra">
-        <summary>Notas extra</summary>
+      <details class="notas">
+        <summary>Notas extra: contexto que se mete en todos los prompts</summary>
         <label class="campo">
-          <textarea id="extra" placeholder="Contexto que quieras meter en todos los prompts: público, ángulo, restricciones..."></textarea>
+          <textarea id="extra" placeholder="Público objetivo, ángulo que quieres, restricciones, lo que ya probaste..."></textarea>
         </label>
       </details>
     </div>
-  </header>
+  </div>
 
   <main>
-    <div class="barra">
-      <input id="buscar" type="search" placeholder="Buscar prompt por nombre o categoría...">
-      <span id="contador"></span>
+    <div class="filtros">
+      <div class="chips" id="chips" role="group" aria-label="Filtrar por categoría"></div>
+      <span class="buscador">
+        <input id="buscar" type="search" placeholder="Buscar prompt…" aria-label="Buscar prompt">
+      </span>
+      <span class="marcador" id="contador"></span>
     </div>
+
     <div id="lista"></div>
     <div id="estado" class="estado">Cargando prompts…</div>
   </main>
@@ -400,98 +658,67 @@
   <dialog id="modal">
     <div class="dlg-cab">
       <h2 id="dlgTitulo">Vista previa</h2>
-      <button id="dlgCerrar" class="fantasma">✕</button>
+      <button id="dlgCerrar" class="btn-plano" aria-label="Cerrar">Cerrar</button>
     </div>
     <div class="dlg-cuerpo">
-      <textarea id="dlgTexto" spellcheck="false"></textarea>
+      <textarea id="dlgTexto" spellcheck="false" aria-label="Prompt generado"></textarea>
     </div>
     <div class="dlg-pie">
-      <button id="dlgCerrar2" class="btn-sec">Cerrar</button>
-      <button id="dlgCopiar" class="btn">Copiar</button>
+      <span class="medida" id="dlgMedida"></span>
+      <button id="dlgCopiar" class="btn">Copiar prompt</button>
     </div>
   </dialog>
 
   <div id="toast" role="status" aria-live="polite"></div>
 
+<script>window.SEMILLA = [{"id": "p1", "categoria": "Copywriting & Ventas", "nombre": "Fórmula PAS (problema · agitación · solución)", "descripcion": "Texto publicitario en tres tiempos, sin agitación falsa.", "destino": "ChatGPT", "plantilla": "Escribe un texto publicitario con la fórmula PAS para este producto.\n\nProducto: {{producto}}\nReferencia: {{url}}\nTítulo de la página: {{titulo}}\nDescripción oficial: {{descripcion}}\nPrecio: {{precio}}\nNotas mías: {{extra}}\n\nEstructura:\n1. PROBLEMA — la situación concreta de quien lo compraría, contada en escena, no en abstracto.\n2. AGITACIÓN — qué le cuesta seguir así. Coste real (tiempo, dinero, salud), sin catastrofismo.\n3. SOLUCIÓN — cómo encaja el producto y qué cambia el lunes siguiente.\n\nReglas:\n- 180-220 palabras en total.\n- Nada de \"descubre\", \"transforma\", \"eleva\", \"revoluciona\", \"la solución definitiva\".\n- Prohibido el molde \"Verbo: producto\".\n- Si no sabes un dato, no lo inventes: escribe [VERIFICAR] y sigue.", "orden": 1}, {"id": "p2", "categoria": "Copywriting & Ventas", "nombre": "Hero de landing: titular, subtítulo y CTA", "descripcion": "Tres bloques para la parte de arriba de la página de venta.", "destino": "Claude", "plantilla": "Escribe la parte superior de una landing para este producto.\n\nProducto: {{producto}}\nReferencia: {{url}}\nTítulo de la página: {{titulo}}\nDescripción oficial: {{descripcion}}\nPrecio: {{precio}}\nNotas mías: {{extra}}\n\nDame 3 versiones completas, cada una con:\n- Titular (máx. 60 caracteres). Empieza por lo que el lector reconoce, no por el nombre del producto.\n- Subtítulo (máx. 130 caracteres) que añada información nueva, no que repita el titular.\n- Texto del botón (2-4 palabras, verbo concreto: nada de \"Saber más\").\n- Una línea de microcopia debajo del botón que quite un miedo.\n\nDespués: cuál de las 3 elegirías tú, por qué, y qué tendría que pasar en las métricas para descartarla.", "orden": 2}, {"id": "p3", "categoria": "Copywriting & Ventas", "nombre": "Correo de recomendación", "descripcion": "Email corto a la lista, con historia antes que ficha técnica.", "destino": "ChatGPT", "plantilla": "Escribe un correo corto para mi lista recomendando este producto.\n\nProducto: {{producto}}\nReferencia: {{url}}\nTítulo de la página: {{titulo}}\nDescripción oficial: {{descripcion}}\nPrecio: {{precio}}\nNotas mías: {{extra}}\n\nEstructura:\n- Asunto: máx. 45 caracteres, sin emoji, sin corchetes.\n- Cuerpo: 120-160 palabras.\n- Un solo enlace, en la penúltima línea.\n- Cierre con una pregunta que se pueda responder al correo.\n\nEmpieza contando cuándo lo usé o por qué lo busqué. La ficha técnica va después, y solo lo que importe.\nSin \"espero que estés bien\", sin lista de beneficios con viñetas, sin urgencia inventada.", "orden": 3}, {"id": "p4", "categoria": "Copywriting & Ventas", "nombre": "Secuencia de 4 correos", "descripcion": "Del problema al cierre, con el trabajo repartido entre correos.", "destino": "Claude", "plantilla": "Diseña una secuencia de 4 correos para vender este producto.\n\nProducto: {{producto}}\nReferencia: {{url}}\nTítulo de la página: {{titulo}}\nDescripción oficial: {{descripcion}}\nPrecio: {{precio}}\nNotas mías: {{extra}}\n\nReparto:\n- Correo 1: el problema, contado con un caso concreto. Sin mencionar el producto.\n- Correo 2: qué he probado antes y por qué no funcionó.\n- Correo 3: el producto y la prueba de que hace lo que dice.\n- Correo 4: objeción principal resuelta + cierre.\n\nPara cada correo: asunto, primera frase, idea central en una línea y llamada a la acción.\nNo escribas los correos completos todavía. Marca en qué día enviarías cada uno y por qué.", "orden": 4}, {"id": "p5", "categoria": "Copywriting & Ventas", "nombre": "Beneficios a partir de especificaciones", "descripcion": "Traduce datos técnicos a lo que le cambia al comprador.", "destino": "ChatGPT", "plantilla": "Convierte las especificaciones de este producto en beneficios concretos.\n\nProducto: {{producto}}\nReferencia: {{url}}\nTítulo de la página: {{titulo}}\nDescripción oficial: {{descripcion}}\nPrecio: {{precio}}\nNotas mías: {{extra}}\n\nFormato: una tabla de tres columnas.\n| Especificación | Qué significa en la práctica | Para quién importa |\n\nReglas:\n- Cada fila arranca de un dato real de la ficha. Si el dato no está, no inventes la fila.\n- La columna del medio se escribe con un verbo y un momento del día (\"no tienes que volver a llenarlo hasta el viernes\").\n- Prohibido \"buena calidad-precio\", \"diseño elegante\", \"gran rendimiento\".\n- Al final: los 2 datos que más venden y el que sobra de la ficha.", "orden": 5}, {"id": "p6", "categoria": "SEO & Fichas", "nombre": "Descripción de producto para e-commerce", "descripcion": "Ficha completa lista para pegar en la tienda.", "destino": "ChatGPT", "plantilla": "Escribe la descripción de producto para una tienda online.\n\nProducto: {{producto}}\nReferencia: {{url}}\nTítulo de la página: {{titulo}}\nDescripción oficial: {{descripcion}}\nPrecio: {{precio}}\nNotas mías: {{extra}}\n\nEntrega:\n- Párrafo de apertura (40-60 palabras) con la búsqueda principal en la primera frase.\n- 5 viñetas de características, cada una con el dato delante y la consecuencia detrás.\n- Bloque \"Para quién sí / para quién no\", una frase cada uno.\n- Cierre de 30 palabras con la garantía o el envío si los conozco.\n\nLa palabra clave principal aparece en la primera frase y una segunda vez, como mucho. Nada de repetirla a la fuerza.", "orden": 1}, {"id": "p7", "categoria": "SEO & Fichas", "nombre": "Meta title y meta description", "descripcion": "Cinco pares listos para el buscador, con el conteo hecho.", "destino": "ChatGPT", "plantilla": "Escribe 5 pares de meta title + meta description para esta página.\n\nProducto: {{producto}}\nReferencia: {{url}}\nTítulo de la página: {{titulo}}\nDescripción oficial: {{descripcion}}\nPrecio: {{precio}}\nNotas mías: {{extra}}\n\nReglas:\n- Title: máx. 60 caracteres, la palabra clave al principio.\n- Description: 140-155 caracteres, con un dato concreto (precio, medida, plazo) y un motivo para hacer clic.\n- Nada de \"Descubre\", \"La mejor guía\", \"Todo lo que necesitas saber\".\n- Cada par tiene que atacar una intención de búsqueda distinta. Dime cuál es en una nota entre paréntesis.\n\nPon el número de caracteres entre corchetes al final de cada línea.", "orden": 2}, {"id": "p8", "categoria": "SEO & Fichas", "nombre": "FAQ de ficha de producto", "descripcion": "Preguntas reales para resolver dudas y ganar el snippet.", "destino": "Claude", "plantilla": "Escribe el bloque de preguntas frecuentes de esta ficha de producto.\n\nProducto: {{producto}}\nReferencia: {{url}}\nTítulo de la página: {{titulo}}\nDescripción oficial: {{descripcion}}\nPrecio: {{precio}}\nNotas mías: {{extra}}\n\n- 8 preguntas escritas como las teclearía alguien en Google, no como las redactaría la marca.\n- Respuestas de 40-60 palabras, directas, empezando por la respuesta.\n- Al menos 3 tienen que tocar una pega o limitación real. Una FAQ que solo vende no la lee nadie.\n- Si una respuesta necesita un dato que no está en la referencia, escribe [VERIFICAR] en su sitio.\n\nAl final, dame las 8 preguntas también en JSON-LD con esquema FAQPage.", "orden": 3}, {"id": "p9", "categoria": "SEO & Fichas", "nombre": "Mapa de palabras clave e intención", "descripcion": "Qué buscar, con qué intención y qué contenido le toca.", "destino": "Claude", "plantilla": "Haz un mapa de palabras clave alrededor de este producto.\n\nProducto: {{producto}}\nReferencia: {{url}}\nTítulo de la página: {{titulo}}\nDescripción oficial: {{descripcion}}\nPrecio: {{precio}}\nNotas mías: {{extra}}\n\nTabla con: término | intención (informativa / comparativa / transaccional) | dificultad estimada (alta/media/baja y por qué) | formato de contenido que le corresponde.\n\n- 15 términos, repartidos entre las tres intenciones.\n- Incluye al menos 4 búsquedas de cola larga con un problema dentro (\"cafetera que no gotee al servir\").\n- Marca con ▲ los 3 por los que empezaría yo y explica el criterio en una línea.\n- Nada de listas de volúmenes inventados: si no tienes el dato, di que hay que comprobarlo.", "orden": 4}, {"id": "p10", "categoria": "Redes Sociales", "nombre": "Guion de TikTok / Reels / Shorts (30 s)", "descripcion": "Gancho, desarrollo y cierre con marcas de tiempo.", "destino": "ChatGPT", "plantilla": "Escribe un guion de 30-45 segundos para TikTok o Reels sobre este producto.\n\nProducto: {{producto}}\nReferencia: {{url}}\nTítulo de la página: {{titulo}}\nDescripción oficial: {{descripcion}}\nPrecio: {{precio}}\nNotas mías: {{extra}}\n\nFormato por bloques, con segundo de inicio:\n[0-3 s] Gancho hablado + qué se ve en pantalla.\n[3-20 s] El desarrollo, en 3 golpes. Cada golpe: una frase dicha y un plano.\n[20-30 s] Cierre y llamada a la acción.\n\nReglas:\n- El gancho es una situación reconocible o un dato que sorprenda. Nunca \"¿Sabías que...?\" ni \"Para en 3, 2, 1\".\n- Frases de hablar, no de leer. Máximo 12 palabras cada una.\n- Añade el texto en pantalla de cada bloque, distinto de lo que se dice.\n- Al final: 3 ganchos alternativos para probar el mismo guion.", "orden": 1}, {"id": "p11", "categoria": "Redes Sociales", "nombre": "Títulos de pin de Pinterest (5 variantes)", "descripcion": "Con la keyword al inicio y sin lenguaje de folleto.", "destino": "ChatGPT", "plantilla": "Escribe 5 títulos de pin de Pinterest para este producto.\n\nProducto: {{producto}}\nReferencia: {{url}}\nTítulo de la página: {{titulo}}\nDescripción oficial: {{descripcion}}\nPrecio: {{precio}}\nNotas mías: {{extra}}\n\nReglas:\n- Máximo 40 caracteres cada uno.\n- La palabra clave principal va al principio, no al final.\n- Nada de \"descubre\", \"transforma\", \"eleva\", \"revoluciona\".\n- Prohibido el molde \"Verbo: producto\" (nada de \"Ahorra tiempo: la cafetera X\").\n- Que se lean como algo que escribiría una persona buscando eso en Google.\n\nLista numerada, con el número de caracteres entre corchetes. Sin explicaciones.", "orden": 2}, {"id": "p12", "categoria": "Redes Sociales", "nombre": "Descripción de pin + hashtags", "descripcion": "Dos frases orientadas a búsqueda, no a poesía.", "destino": "ChatGPT", "plantilla": "Escribe la descripción de un pin de Pinterest para este producto.\n\nProducto: {{producto}}\nReferencia: {{url}}\nTítulo de la página: {{titulo}}\nDescripción oficial: {{descripcion}}\nPrecio: {{precio}}\nNotas mías: {{extra}}\n\nFormato: 2 frases, máximo 180 caracteres en total, más 4 hashtags al final.\nLa primera frase contiene la búsqueda real que haría alguien interesado.\nLa segunda añade el dato que hace clicar: medida, precio, plazo o pega resuelta.\nTono directo, sin adjetivos de catálogo. Español neutro.\n\nDame 3 versiones y di cuál pondrías tú en un tablero nuevo sin autoridad todavía.", "orden": 3}, {"id": "p13", "categoria": "Redes Sociales", "nombre": "Carrusel de 8 diapositivas", "descripcion": "Un carrusel con una idea por slide, para LinkedIn o Instagram.", "destino": "Claude", "plantilla": "Diseña un carrusel de 8 diapositivas sobre este producto.\n\nProducto: {{producto}}\nReferencia: {{url}}\nTítulo de la página: {{titulo}}\nDescripción oficial: {{descripcion}}\nPrecio: {{precio}}\nNotas mías: {{extra}}\n\nPara cada diapositiva:\n- Titular (máx. 8 palabras).\n- Cuerpo (máx. 25 palabras).\n- Qué se ve: foto, captura, esquema o solo tipografía.\n\nReparto: slide 1 el gancho, 2 el problema, 3-6 el desarrollo (una idea cada una, sin solaparse), 7 la prueba, 8 la llamada a la acción.\nLa diapositiva 1 tiene que funcionar sola en el feed, sin las otras 7.\nNada de numerar las slides con \"01 / 02 / 03\" si el orden no aporta información.", "orden": 4}, {"id": "p14", "categoria": "Redes Sociales", "nombre": "Hilo de X en 7 publicaciones", "descripcion": "Un hilo que se pueda leer entero sin abrir el enlace.", "destino": "ChatGPT", "plantilla": "Escribe un hilo de 7 publicaciones para X sobre este producto.\n\nProducto: {{producto}}\nReferencia: {{url}}\nTítulo de la página: {{titulo}}\nDescripción oficial: {{descripcion}}\nPrecio: {{precio}}\nNotas mías: {{extra}}\n\n- Publicación 1: la afirmación completa, no un teaser. Que se entienda sin abrir el hilo.\n- Publicaciones 2-6: una idea cada una, máximo 260 caracteres, sin numerar.\n- Publicación 7: qué hacer ahora y el enlace.\n\nSin emojis de flecha, sin \"🧵\", sin \"abro hilo\". Cada publicación tiene que aguantar sola como cita.\nAl final dime cuál de las 7 usarías como publicación suelta si el hilo no funciona.", "orden": 5}, {"id": "p15", "categoria": "Análisis & Estrategia", "nombre": "Matriz de objeciones y respuestas", "descripcion": "Lo que frena la compra y dónde se responde.", "destino": "Claude", "plantilla": "Haz la matriz de objeciones de compra de este producto.\n\nProducto: {{producto}}\nReferencia: {{url}}\nTítulo de la página: {{titulo}}\nDescripción oficial: {{descripcion}}\nPrecio: {{precio}}\nNotas mías: {{extra}}\n\nTabla: objeción (dicha con las palabras del comprador) | qué hay de verdad en ella | respuesta honesta | dónde va esa respuesta (ficha, email, FAQ, anuncio).\n\n- 8 objeciones, ordenadas de la que más frena a la que menos.\n- Al menos 2 tienen que ser objeciones donde el comprador tiene razón. Di qué hacer entonces.\n- Nada de respuestas tipo \"en realidad es una inversión\".\n- Cierra con la objeción que no se puede resolver con texto y qué haría falta (una demo, una garantía, una prueba).", "orden": 1}, {"id": "p16", "categoria": "Análisis & Estrategia", "nombre": "Auditoría de competencia y diferenciador", "descripcion": "Contra quién compites de verdad y qué te queda libre.", "destino": "Claude", "plantilla": "Analiza la competencia de este producto y dime qué territorio queda libre.\n\nProducto: {{producto}}\nReferencia: {{url}}\nTítulo de la página: {{titulo}}\nDescripción oficial: {{descripcion}}\nPrecio: {{precio}}\nNotas mías: {{extra}}\n\n1. Los 4 competidores directos reales (no los que la marca dice tener) y en qué gana cada uno.\n2. En qué se parecen todos: el mensaje que ya está quemado en la categoría.\n3. Tres ángulos de diferenciación disponibles, con el riesgo de cada uno.\n4. La Propuesta Única de Valor que elegirías tú, en una frase de máximo 15 palabras, y por qué esa.\n5. Qué tendría que ser cierto del producto para poder sostener esa promesa. Si algo no lo sé, dilo.", "orden": 2}, {"id": "p17", "categoria": "Análisis & Estrategia", "nombre": "Tres perfiles de comprador", "descripcion": "Quién compra esto, con contexto y disparador de compra.", "destino": "Claude", "plantilla": "Define 3 perfiles de comprador para este producto.\n\nProducto: {{producto}}\nReferencia: {{url}}\nTítulo de la página: {{titulo}}\nDescripción oficial: {{descripcion}}\nPrecio: {{precio}}\nNotas mías: {{extra}}\n\nPara cada perfil:\n- Situación en dos frases: momento vital, no demografía suelta.\n- El disparador: qué pasa el día que decide buscar esto.\n- Qué compara antes de decidir.\n- Qué le hace abandonar el carrito.\n- La frase exacta que diría al describir su problema.\n\nDespués: cuál de los 3 atacaría yo primero, por qué, y qué canal le corresponde.\nNo me des edades ni \"profesional de 25-40 años\" si no cambia nada del mensaje.", "orden": 3}, {"id": "p18", "categoria": "Análisis & Estrategia", "nombre": "Ocho ángulos de venta priorizados", "descripcion": "Todas las formas de contarlo y por dónde empezar.", "destino": "ChatGPT", "plantilla": "Dame 8 ángulos distintos para vender este producto.\n\nProducto: {{producto}}\nReferencia: {{url}}\nTítulo de la página: {{titulo}}\nDescripción oficial: {{descripcion}}\nPrecio: {{precio}}\nNotas mías: {{extra}}\n\nPara cada ángulo: nombre corto, la promesa en una frase, a qué perfil le habla y en qué formato funciona mejor.\n\nÁngulos que quiero que consideres: ahorro de tiempo, ahorro de dinero, evitar un error caro, estatus, salud, regalo, comparación con la alternativa cara, comparación con no comprar nada.\n\nAl final, ordénalos por probabilidad de funcionar con tráfico frío y explica el criterio del primero y del último.", "orden": 4}, {"id": "p19", "categoria": "Visual & Creatividades", "nombre": "Prompt de imagen para el pin", "descripcion": "Escena descrita en inglés, lista para el generador.", "destino": "Midjourney", "plantilla": "Escribe el prompt de imagen para un pin vertical 2:3 sobre este producto.\n\nProducto: {{producto}}\nReferencia: {{url}}\nTítulo de la página: {{titulo}}\nDescripción oficial: {{descripcion}}\nPrecio: {{precio}}\nNotas mías: {{extra}}\n\nDescríbeme la escena en inglés, en una sola línea: sujeto, entorno, luz, paleta, ángulo de cámara y espacio libre en el tercio superior para el texto.\nSin texto ni logotipos dentro de la imagen. Fotografía real, no ilustración 3D ni render.\n\nDame 3 variantes: una de producto en contexto de uso, una de detalle macro y una de resultado (el problema ya resuelto).\nAñade al final los parámetros de relación de aspecto y estilo que usarías.", "orden": 1}, {"id": "p20", "categoria": "Visual & Creatividades", "nombre": "Concepto de miniatura", "descripcion": "La imagen que decide si se hace clic o no.", "destino": "Claude", "plantilla": "Diseña la miniatura de un vídeo o artículo sobre este producto.\n\nProducto: {{producto}}\nReferencia: {{url}}\nTítulo de la página: {{titulo}}\nDescripción oficial: {{descripcion}}\nPrecio: {{precio}}\nNotas mías: {{extra}}\n\nDame 3 conceptos. Para cada uno:\n- Qué se ve, en una frase.\n- El texto que va encima: máximo 4 palabras.\n- Dónde va el foco visual y qué queda desenfocado.\n- Contraste de color entre el texto y el fondo.\n\nReglas: nada de caras con la boca abierta, nada de flechas rojas, nada de círculos rojos.\nAl final: cuál funcionaría mejor en móvil a tamaño de sello y por qué.", "orden": 2}, {"id": "p21", "categoria": "Visual & Creatividades", "nombre": "Brief de anuncio con variantes A/B", "descripcion": "Creatividad de anuncio con una sola variable cambiada.", "destino": "Claude", "plantilla": "Escribe el brief de una creatividad publicitaria para este producto.\n\nProducto: {{producto}}\nReferencia: {{url}}\nTítulo de la página: {{titulo}}\nDescripción oficial: {{descripcion}}\nPrecio: {{precio}}\nNotas mías: {{extra}}\n\nVersión A (control):\n- Imagen o vídeo: qué se ve.\n- Titular: máx. 40 caracteres.\n- Texto principal: máx. 125 caracteres.\n- Botón.\n\nDespués, tres variantes. Cada una cambia UNA sola cosa respecto a A, y me dices cuál:\n- B: cambia el ángulo del titular.\n- C: cambia la imagen.\n- D: cambia la llamada a la acción.\n\nCierra con qué métrica mira cada test y cuántas impresiones haría falta antes de decidir.", "orden": 3}, {"id": "p22", "categoria": "Investigación & Verificación", "nombre": "Ficha técnica limpia", "descripcion": "Los datos duros separados del marketing.", "destino": "Claude", "plantilla": "Extrae la ficha técnica real de este producto, sin el marketing.\n\nProducto: {{producto}}\nReferencia: {{url}}\nTítulo de la página: {{titulo}}\nDescripción oficial: {{descripcion}}\nPrecio: {{precio}}\nNotas mías: {{extra}}\n\nTabla de dos columnas: dato | valor.\nIncluye medidas, peso, materiales, consumo, capacidad, compatibilidades, garantía y plazo de envío si aparecen.\n\nReglas:\n- Solo lo que esté en la referencia. Nada de rellenar huecos con lo típico de la categoría.\n- Lo que falte va en una lista aparte titulada \"Sin confirmar\".\n- Al final, señala cualquier afirmación de la página que sea una opinión disfrazada de dato.", "orden": 1}, {"id": "p23", "categoria": "Investigación & Verificación", "nombre": "Pros, contras y qué comprobar", "descripcion": "Balance honesto y la lista de lo que hay que verificar.", "destino": "Claude", "plantilla": "Dame el balance honesto de este producto.\n\nProducto: {{producto}}\nReferencia: {{url}}\nTítulo de la página: {{titulo}}\nDescripción oficial: {{descripcion}}\nPrecio: {{precio}}\nNotas mías: {{extra}}\n\n1. Cuatro puntos a favor, cada uno anclado a un dato concreto de la ficha.\n2. Cuatro puntos en contra. Al menos dos deducidos de lo que la página NO dice.\n3. \"Para quién sí\" y \"para quién no\", una frase cada uno.\n4. Dos alternativas directas y en qué gana cada una.\n5. Lista de verificación: qué tendría que comprobar yo antes de recomendarlo, y dónde se comprueba.\n\nNada de \"buena calidad-precio\". Si un punto a favor no se sostiene con un dato, quítalo.", "orden": 2}, {"id": "p24", "categoria": "Investigación & Verificación", "nombre": "Preguntas reales de compradores", "descripcion": "Lo que la gente pregunta antes de pagar, y la respuesta.", "destino": "ChatGPT", "plantilla": "¿Qué pregunta de verdad la gente antes de comprar algo como esto?\n\nProducto: {{producto}}\nReferencia: {{url}}\nTítulo de la página: {{titulo}}\nDescripción oficial: {{descripcion}}\nPrecio: {{precio}}\nNotas mías: {{extra}}\n\nDame 12 preguntas, agrupadas en tres momentos:\n- Antes de considerarlo (¿esto sirve para lo mío?)\n- Comparando (¿por qué este y no el otro?)\n- A punto de pagar (¿y si sale mal?)\n\nCada pregunta con la respuesta en 30 palabras y una marca de dónde conviene responderla: ficha, anuncio, email o página de checkout.\nLas preguntas se escriben con las palabras del comprador, no con las de la marca.", "orden": 3}];</script>
+
 <script>
-/* Solo en la vista previa: deja la app abierta con un ejemplo cargado */
+/* Solo en la vista previa: arranca con un ejemplo cargado */
 try {
   if (!localStorage.getItem('asistente-prompts')) {
     localStorage.setItem('asistente-prompts', JSON.stringify({
-      producto: 'Cafetera de goteo Cecotec Coffee 66',
-      url: 'https://tienda-ejemplo.com/cafetera-goteo-66',
-      extra: 'Público: gente que teletrabaja y hace 3-4 cafés al día en casa.',
+      producto: 'Silla Ergonómica Pro Comfort Mesh',
+      url: 'https://tienda-ejemplo.com/silla-pro-comfort-mesh',
+      extra: 'Público: gente en home office con dolor de espalda. Precio alto frente a la competencia, hay que justificarlo.',
       meta: {
-        titulo: 'Cafetera de goteo con jarra de cristal 1,5 L y filtro permanente',
-        descripcion: 'Cafetera de goteo de 950 W con capacidad para 12 tazas, sistema antigoteo, filtro lavable y placa calefactora que mantiene el café caliente 40 minutos.',
-        precio: '39.90 EUR',
+        titulo: 'Silla ergonómica de malla con soporte lumbar ajustable y reposacabezas',
+        descripcion: 'Silla de oficina con respaldo de malla transpirable, soporte lumbar regulable en altura y profundidad, reposabrazos 4D y mecanismo sincronizado con cinco posiciones de bloqueo.',
+        precio: '289.00 EUR',
         sitio: 'tienda-ejemplo.com'
-      }
+      },
+      favoritos: ['Fórmula PAS (problema · agitación · solución)']
     }));
   }
 } catch (e) {}
-</script>
 
-<script>
-/* Datos falsos solo para la vista previa. El backend real vive en Codigo.gs */
+/* Backend falso. El real vive en Codigo.gs */
 window.MOCK_API = {
-  __retardo: 300,
+  __retardo: 200,
 
   getEstado: function () {
     return { hayHoja: true, hojaUrl: 'https://docs.google.com/spreadsheets/' };
   },
 
   getPrompts: function () {
-    return [
-      { id: 'p1', categoria: 'Pinterest', nombre: 'Títulos de pin (5 variantes)', destino: 'ChatGPT',
-        descripcion: 'Cinco títulos con la keyword al inicio, sin lenguaje de folleto.', orden: 1,
-        plantilla:
-'Escribe 5 títulos de pin de Pinterest para este producto:\n\nProducto: {{producto}}\nPágina: {{url}}\nTítulo de la página: {{titulo}}\nDescripción: {{descripcion}}\nPrecio: {{precio}}\nNotas: {{extra}}\n\nReglas:\n- Máximo 40 caracteres cada uno.\n- La palabra clave principal va al principio, no al final.\n- Nada de "descubre", "transforma", "eleva", "revoluciona".\n- Prohibido el molde "Verbo: producto".\n- Que se lean como algo que escribiría una persona buscando eso en Google.\n\nDevuélvelos en lista numerada, sin explicaciones.' },
-
-      { id: 'p2', categoria: 'Pinterest', nombre: 'Descripción de pin + hashtags', destino: 'ChatGPT',
-        descripcion: 'Descripción de 2 frases orientada a búsqueda.', orden: 2,
-        plantilla:
-'Escribe la descripción de un pin de Pinterest para: {{producto}}\n\nDatos de la página ({{sitio}}):\nTítulo: {{titulo}}\nDescripción: {{descripcion}}\nPrecio: {{precio}}\nURL: {{url}}\nNotas: {{extra}}\n\nFormato: 2 frases (máx. 180 caracteres en total) + 4 hashtags al final.\nLa primera frase tiene que contener la búsqueda real que haría alguien interesado.\nTono directo, sin adjetivos de catálogo. Español neutro.' },
-
-      { id: 'p3', categoria: 'Contenido', nombre: 'Esqueleto de reseña', destino: 'Claude',
-        descripcion: 'Estructura de artículo de reseña con secciones y ángulos.', orden: 1,
-        plantilla:
-'Necesito el esqueleto de una reseña honesta de: {{producto}}\n\nFuente: {{url}}\nTítulo de la página: {{titulo}}\nDescripción oficial: {{descripcion}}\nPrecio: {{precio}}\nContexto extra: {{extra}}\n\nDame:\n1. Tres ángulos posibles para el artículo, y cuál elegirías tú y por qué.\n2. El H1 y los H2 del ángulo ganador.\n3. Para cada H2, una frase con lo que va dentro.\n4. Las 3 objeciones que tendría alguien antes de comprarlo.\n5. Qué datos me faltan y tendría que verificar por mi cuenta.\n\nNo escribas todavía el artículo.' },
-
-      { id: 'p4', categoria: 'Contenido', nombre: 'Ficha comparativa', destino: 'Claude',
-        descripcion: 'Tabla pros/contras y para quién sí y para quién no.', orden: 2,
-        plantilla:
-'Analiza este producto y dame una ficha de decisión:\n\nProducto: {{producto}}\nURL: {{url}}\nTítulo: {{titulo}}\nDescripción: {{descripcion}}\nPrecio: {{precio}}\n\nEntrega:\n- Tabla de 4 pros y 4 contras concretos (nada de "buena calidad-precio").\n- "Para quién sí" y "para quién no", una frase cada uno.\n- Dos alternativas directas y en qué gana cada una.\n- Una pega real que la marca no menciona.' },
-
-      { id: 'p5', categoria: 'Email', nombre: 'Correo de recomendación', destino: 'ChatGPT',
-        descripcion: 'Email corto a la lista recomendando el producto.', orden: 1,
-        plantilla:
-'Escribe un correo corto para mi lista recomendando: {{producto}}\n\nEnlace: {{url}}\nDatos: {{titulo}} — {{descripcion}}\nPrecio: {{precio}}\nContexto mío: {{extra}}\n\nEstructura: asunto (máx. 45 caracteres, sin emoji), 120-160 palabras, un solo enlace, cierre con una pregunta.\nEmpieza contando cuándo lo usé o para qué lo busqué, no con la ficha técnica.\nSin "espero que estés bien", sin listas de beneficios, sin urgencia falsa.' },
-
-      { id: 'p6', categoria: 'Imagen', nombre: 'Prompt de imagen para el pin', destino: 'Midjourney',
-        descripcion: 'Prompt visual listo para Midjourney o similar.', orden: 1,
-        plantilla:
-'Prompt de imagen vertical 2:3 para un pin de Pinterest sobre {{producto}}.\nReferencia visual: {{url}}\nContexto: {{titulo}}. {{descripcion}}\nNotas: {{extra}}\n\nDescríbeme la escena en inglés, en una sola línea: sujeto, entorno, luz, paleta, ángulo de cámara y espacio libre arriba para el texto.\nSin texto ni logos dentro de la imagen. Estilo fotografía real, no ilustración 3D.' }
-    ];
+    return (window.SEMILLA || []).slice();
   },
 
   leerUrl: function (url) {
-    var dominio = (String(url).match(/^https?:\/\/([^\/\?#:]+)/i) || [])[1] || '';
-    dominio = dominio.replace(/^www\./i, '');
-
-    if (/amazon\./i.test(dominio)) {
-      return { ok: false, sitio: dominio,
-        error: 'La página respondió 503. Ese sitio bloquea lectores automáticos: rellena los campos a mano.' };
-    }
+    var dominio = ((String(url).match(/^https?:\/\/([^\/\?#:]+)/i) || [])[1] || '').replace(/^www\./i, '');
     if (!/^https?:\/\//i.test(String(url))) {
       return { ok: false, error: 'La URL tiene que empezar por http:// o https://' };
+    }
+    if (/amazon\.|aliexpress\./i.test(dominio)) {
+      return { ok: false, sitio: dominio,
+        error: 'La página respondió 503. Ese sitio bloquea lectores automáticos: rellena los campos a mano.' };
     }
     return {
       ok: true,
       sitio: dominio,
-      titulo: 'Cafetera de goteo con jarra de cristal 1,5 L y filtro permanente',
-      descripcion: 'Cafetera de goteo de 950 W con capacidad para 12 tazas, sistema antigoteo, filtro lavable y placa calefactora que mantiene el café caliente 40 minutos.',
-      precio: '39.90 EUR',
+      titulo: 'Silla ergonómica de malla con soporte lumbar ajustable y reposacabezas',
+      descripcion: 'Silla de oficina con respaldo de malla transpirable, soporte lumbar regulable en altura y profundidad, reposabrazos 4D y mecanismo sincronizado con cinco posiciones de bloqueo.',
+      precio: '289.00 EUR',
       imagen: '',
       error: ''
     };
@@ -503,95 +730,99 @@ window.MOCK_API = {
 (function () {
   'use strict';
 
-  var estado = { prompts: [], filtro: '', meta: {}, promptActual: null };
+  var CLAVE = 'asistente-prompts';
+  var estado = { prompts: [], filtro: '', categoria: 'todos', favoritos: [], meta: {} };
   var $ = function (id) { return document.getElementById(id); };
 
-  /* ── Puente con el backend (o con el mock en la vista previa) ── */
+  /* ── Puente con el backend (o con el mock de la vista previa) ── */
   function api(nombre) {
     var args = Array.prototype.slice.call(arguments, 1);
     return new Promise(function (ok, mal) {
       if (window.MOCK_API && window.MOCK_API[nombre]) {
         setTimeout(function () {
-          try { ok(window.MOCK_API[nombre].apply(null, args)); }
-          catch (e) { mal(e); }
-        }, window.MOCK_API.__retardo || 250);
+          try { ok(window.MOCK_API[nombre].apply(null, args)); } catch (e) { mal(e); }
+        }, window.MOCK_API.__retardo || 220);
         return;
       }
       google.script.run.withSuccessHandler(ok).withFailureHandler(mal)[nombre].apply(null, args);
     });
   }
 
-  /* ── Almacenamiento local (sobrevive a recargas) ── */
+  /* ── Persistencia ── */
   function guardar() {
     try {
-      localStorage.setItem('asistente-prompts', JSON.stringify({
+      localStorage.setItem(CLAVE, JSON.stringify({
         producto: $('producto').value,
         url: $('url').value,
         extra: $('extra').value,
-        meta: estado.meta
+        meta: estado.meta,
+        favoritos: estado.favoritos
       }));
-    } catch (e) { /* modo incógnito */ }
+    } catch (e) { /* incógnito */ }
   }
 
   function restaurar() {
     var d;
-    try { d = JSON.parse(localStorage.getItem('asistente-prompts') || '{}'); }
-    catch (e) { d = {}; }
+    try { d = JSON.parse(localStorage.getItem(CLAVE) || '{}'); } catch (e) { d = {}; }
     $('producto').value = d.producto || '';
     $('url').value = d.url || '';
     $('extra').value = d.extra || '';
+    estado.favoritos = Array.isArray(d.favoritos) ? d.favoritos : [];
     if (d.extra) $('extra').closest('details').open = true;
-    if (d.meta && (d.meta.titulo || d.meta.descripcion || d.meta.precio)) {
-      pintarMeta(d.meta);
-    }
+    if (d.meta && (d.meta.titulo || d.meta.descripcion || d.meta.precio)) pintarLectura(d.meta);
   }
 
-  /* ── Variables disponibles en las plantillas ── */
-  function variables() {
+  /* ── Variables de plantilla ──
+     modoMuestra deja marcadores visibles en lugar de vaciar los huecos,
+     para que la tarjeta enseñe la forma del prompt antes de rellenar nada. */
+  function variables(modoMuestra) {
     var url = $('url').value.trim();
-    var dominio = '';
     var m = url.match(/^https?:\/\/([^\/\?#:]+)/i);
-    if (m) dominio = m[1].replace(/^www\./i, '');
     var hoy = new Date();
-    var iso = hoy.getFullYear() + '-' +
-      String(hoy.getMonth() + 1).padStart(2, '0') + '-' +
-      String(hoy.getDate()).padStart(2, '0');
-
-    return {
+    var v = {
       producto: $('producto').value.trim(),
       url: url,
       titulo: $('mTitulo').value.trim(),
       descripcion: $('mDescripcion').value.trim(),
       precio: $('mPrecio').value.trim(),
-      sitio: dominio,
+      sitio: m ? m[1].replace(/^www\./i, '') : '',
       extra: $('extra').value.trim(),
-      fecha: iso
+      fecha: hoy.getFullYear() + '-' +
+        String(hoy.getMonth() + 1).padStart(2, '0') + '-' +
+        String(hoy.getDate()).padStart(2, '0')
     };
+    if (modoMuestra) {
+      Object.keys(v).forEach(function (k) { if (!v[k]) v[k] = '‹' + k + '›'; });
+    }
+    return v;
   }
+
+  var PATRON = /\{\{\s*(\w+)\s*\}\}/g;
 
   /**
    * Rellena la plantilla. Si una línea contiene SOLO variables vacías,
-   * la línea entera desaparece (no quedan etiquetas huérfanas tipo "Precio:").
+   * la línea entera desaparece: no quedan etiquetas huérfanas tipo "Precio:".
    */
   function rellenar(plantilla, vars) {
-    var patron = /\{\{\s*(\w+)\s*\}\}/g;
-    var salida = String(plantilla).split('\n').filter(function (linea) {
-      var usadas = linea.match(patron);
+    return String(plantilla).split('\n').filter(function (linea) {
+      var usadas = linea.match(PATRON);
       if (!usadas) return true;
       return usadas.some(function (t) {
-        var clave = t.replace(/[{}\s]/g, '');
-        return String(vars[clave] || '').trim() !== '';
+        return String(vars[t.replace(/[{}\s]/g, '')] || '').trim() !== '';
       });
     }).map(function (linea) {
-      return linea.replace(patron, function (_, clave) {
+      return linea.replace(PATRON, function (_, clave) {
         return vars[clave] != null ? vars[clave] : '';
       });
-    });
-
-    return salida.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+    }).join('\n').replace(/\n{3,}/g, '\n\n').trim();
   }
 
-  /* ── Copiar al portapapeles, con dos planes B ── */
+  function palabras(texto) {
+    var n = texto.trim().split(/\s+/).filter(Boolean).length;
+    return n;
+  }
+
+  /* ── Portapapeles, con dos planes B ── */
   function copiar(texto) {
     return new Promise(function (ok, mal) {
       if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -616,7 +847,6 @@ window.MOCK_API = {
     bien ? ok() : mal(new Error('sin-portapapeles'));
   }
 
-  /* ── Avisos ── */
   var relojToast;
   function toast(texto, malo) {
     var t = $('toast');
@@ -626,68 +856,151 @@ window.MOCK_API = {
     relojToast = setTimeout(function () { t.className = ''; }, 2600);
   }
 
-  /* ── Pintar la lista ── */
-  function pintarLista() {
-    var cont = $('lista');
+  function escapar(t) {
+    return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  /* ── Filtros ── */
+  function esFavorito(p) { return estado.favoritos.indexOf(p.nombre) > -1; }
+
+  function categorias() {
+    var vistas = [];
+    estado.prompts.forEach(function (p) {
+      if (vistas.indexOf(p.categoria) === -1) vistas.push(p.categoria);
+    });
+    return vistas;
+  }
+
+  function coincide(p) {
+    if (estado.categoria === 'favoritos' && !esFavorito(p)) return false;
+    if (estado.categoria !== 'todos' && estado.categoria !== 'favoritos' && p.categoria !== estado.categoria) return false;
+    if (!estado.filtro) return true;
     var q = estado.filtro.toLowerCase();
-    var visibles = estado.prompts.filter(function (p) {
-      if (!q) return true;
-      return (p.nombre + ' ' + p.categoria + ' ' + p.descripcion + ' ' + p.destino).toLowerCase().indexOf(q) > -1;
+    return (p.nombre + ' ' + p.categoria + ' ' + p.descripcion + ' ' + p.destino + ' ' + p.plantilla)
+      .toLowerCase().indexOf(q) > -1;
+  }
+
+  function pintarChips() {
+    var cont = $('chips');
+    cont.innerHTML = '';
+    var opciones = [{ id: 'todos', texto: 'Todos', n: estado.prompts.length }];
+    if (estado.favoritos.length) {
+      opciones.push({
+        id: 'favoritos', texto: '★ Favoritos',
+        n: estado.prompts.filter(esFavorito).length
+      });
+    }
+    categorias().forEach(function (c) {
+      opciones.push({
+        id: c, texto: c,
+        n: estado.prompts.filter(function (p) { return p.categoria === c; }).length
+      });
     });
 
-    $('contador').textContent = visibles.length + (visibles.length === 1 ? ' prompt' : ' prompts');
+    opciones.forEach(function (o) {
+      var b = document.createElement('button');
+      b.className = 'chip rotulo';
+      b.type = 'button';
+      b.setAttribute('aria-pressed', String(estado.categoria === o.id));
+      b.innerHTML = escapar(o.texto) + ' <span class="cuenta">' + o.n + '</span>';
+      b.addEventListener('click', function () {
+        estado.categoria = o.id;
+        pintarChips();
+        pintarLista();
+      });
+      cont.appendChild(b);
+    });
+  }
+
+  /* ── Rejilla ── */
+  function pintarLista() {
+    var cont = $('lista');
+    var visibles = estado.prompts.filter(coincide);
+    var vars = variables(true);
+
+    $('contador').textContent = visibles.length === estado.prompts.length
+      ? estado.prompts.length + ' prompts'
+      : visibles.length + ' de ' + estado.prompts.length + ' prompts';
+
     cont.innerHTML = '';
 
     if (!visibles.length) {
       $('estado').hidden = false;
       $('estado').innerHTML = estado.prompts.length
-        ? 'Ningún prompt coincide con «' + escapar(estado.filtro) + '».'
-        : 'La hoja está vacía. Añade filas en el Sheet y pulsa Recargar.';
+        ? 'Ningún prompt coincide con el filtro.'
+        : 'La hoja no tiene prompts activos. Añade filas y pulsa <b>Recargar</b>.';
       return;
     }
     $('estado').hidden = true;
 
-    var categoriaActual = null;
-    var grupo = null;
+    var agrupar = estado.categoria === 'todos' && !estado.filtro;
 
-    visibles.forEach(function (p) {
-      if (p.categoria !== categoriaActual) {
-        categoriaActual = p.categoria;
-        var h = document.createElement('div');
-        h.className = 'cat';
-        h.textContent = p.categoria;
-        cont.appendChild(h);
-        grupo = document.createElement('div');
-        grupo.className = 'tarjetas';
-        cont.appendChild(grupo);
-      }
+    if (!agrupar) {
+      var rejilla = document.createElement('div');
+      rejilla.className = 'rejilla';
+      visibles.forEach(function (p) { rejilla.appendChild(ficha(p, vars, false)); });
+      cont.appendChild(rejilla);
+      return;
+    }
 
-      var card = document.createElement('article');
-      card.className = 'tarjeta';
-      card.innerHTML =
-        (p.destino ? '<span class="badge">' + escapar(p.destino) + '</span>' : '') +
-        '<h3>' + escapar(p.nombre) + '</h3>' +
-        '<p>' + escapar(p.descripcion || '') + '</p>' +
-        '<div class="acciones">' +
-        '  <button class="btn" data-accion="copiar">Copiar</button>' +
-        '  <button class="btn-sec" data-accion="ver">Ver</button>' +
-        '</div>';
+    categorias().forEach(function (c) {
+      var delGrupo = visibles.filter(function (p) { return p.categoria === c; });
+      if (!delGrupo.length) return;
 
-      card.querySelector('[data-accion="copiar"]').addEventListener('click', function (ev) {
-        alCopiar(p, ev.currentTarget);
-      });
-      card.querySelector('[data-accion="ver"]').addEventListener('click', function () {
-        abrirModal(p);
-      });
+      var grupo = document.createElement('section');
+      grupo.className = 'grupo';
+      var cab = document.createElement('div');
+      cab.className = 'grupo-cab';
+      cab.innerHTML = '<h2>' + escapar(c) + '</h2><span class="marcador">' + delGrupo.length + '</span>';
+      grupo.appendChild(cab);
 
-      grupo.appendChild(card);
+      var r = document.createElement('div');
+      r.className = 'rejilla';
+      delGrupo.forEach(function (p) { r.appendChild(ficha(p, vars, true)); });
+      grupo.appendChild(r);
+      cont.appendChild(grupo);
     });
   }
 
-  function escapar(t) {
-    return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  function ficha(p, vars, agrupado) {
+    var completo = rellenar(p.plantilla, vars);
+    var n = palabras(completo);
+    // En 4 líneas de tarjeta no caben renglones vacíos: se enseñan las 4 primeras con contenido.
+    var muestra = completo.split('\n').filter(function (l) { return l.trim(); }).slice(0, 4).join('\n');
+
+    var el = document.createElement('article');
+    el.className = 'ficha';
+    el.innerHTML =
+      '<div class="ficha-cab">' +
+      '  <span class="ficha-cat rotulo">' + escapar(agrupado ? (p.destino || 'Prompt') : p.categoria) + '</span>' +
+      '  <button class="estrella" type="button" aria-pressed="' + esFavorito(p) + '" title="Marcar como favorito">' +
+         (esFavorito(p) ? '★' : '☆') + '</button>' +
+      '</div>' +
+      '<h3>' + escapar(p.nombre) + '</h3>' +
+      (p.descripcion ? '<p class="resumen">' + escapar(p.descripcion) + '</p>' : '') +
+      '<pre class="muestra">' + escapar(muestra) + '</pre>' +
+      '<div class="ficha-pie">' +
+      '  <span class="medida">≈' + n + ' palabras' +
+           (!agrupado && p.destino ? ' · ' + escapar(p.destino) : '') + '</span>' +
+      '  <button class="btn-plano" type="button" data-accion="ver">Ver</button>' +
+      '  <button class="btn" type="button" data-accion="copiar">Copiar</button>' +
+      '</div>';
+
+    el.querySelector('.estrella').addEventListener('click', function (ev) {
+      var i = estado.favoritos.indexOf(p.nombre);
+      i > -1 ? estado.favoritos.splice(i, 1) : estado.favoritos.push(p.nombre);
+      guardar();
+      ev.currentTarget.textContent = esFavorito(p) ? '★' : '☆';
+      ev.currentTarget.setAttribute('aria-pressed', String(esFavorito(p)));
+      pintarChips();
+      if (estado.categoria === 'favoritos') pintarLista();
     });
+    el.querySelector('[data-accion="ver"]').addEventListener('click', function () { abrirModal(p); });
+    el.querySelector('[data-accion="copiar"]').addEventListener('click', function (ev) { alCopiar(p, ev.currentTarget); });
+
+    return el;
   }
 
   /* ── Acciones ── */
@@ -695,6 +1008,7 @@ window.MOCK_API = {
     if ($('producto').value.trim()) return false;
     $('producto').classList.add('falta');
     $('producto').focus();
+    $('producto').scrollIntoView({ block: 'center', behavior: 'smooth' });
     toast('Escribe primero el nombre del producto', true);
     setTimeout(function () { $('producto').classList.remove('falta'); }, 1800);
     return true;
@@ -704,48 +1018,46 @@ window.MOCK_API = {
     if (faltaProducto()) return;
     var texto = rellenar(p.plantilla, variables());
     copiar(texto).then(function () {
-      var antes = boton.textContent;
       boton.textContent = '✓ Copiado';
       boton.classList.add('hecho');
       setTimeout(function () {
-        boton.textContent = antes;
+        boton.textContent = 'Copiar';
         boton.classList.remove('hecho');
       }, 1600);
-      toast('Prompt copiado (' + texto.length + ' caracteres)');
+      toast('Prompt copiado · ' + palabras(texto) + ' palabras');
     }).catch(function () {
       abrirModal(p, true);
-      toast('Tu navegador bloqueó el portapapeles: copia desde aquí', true);
+      toast('El navegador bloqueó el portapapeles: copia desde aquí', true);
     });
   }
 
   function abrirModal(p, seleccionar) {
     if (faltaProducto()) return;
-    estado.promptActual = p;
+    var texto = rellenar(p.plantilla, variables());
     $('dlgTitulo').textContent = p.nombre;
-    $('dlgTexto').value = rellenar(p.plantilla, variables());
+    $('dlgTexto').value = texto;
+    $('dlgMedida').textContent = p.categoria + ' · ≈' + palabras(texto) + ' palabras · ' + texto.length + ' caracteres';
     $('modal').showModal();
-    if (seleccionar) {
-      $('dlgTexto').focus();
-      $('dlgTexto').select();
-    }
+    if (seleccionar) { $('dlgTexto').focus(); $('dlgTexto').select(); }
   }
 
-  function pintarMeta(datos) {
+  function pintarLectura(datos) {
     estado.meta = datos || {};
     $('mTitulo').value = datos.titulo || '';
     $('mDescripcion').value = datos.descripcion || '';
     $('mPrecio').value = datos.precio || '';
-    $('metaSitio').textContent = datos.sitio || 'la página';
-    $('meta').hidden = false;
+    $('metaSitio').textContent = datos.sitio || '';
+    $('lectura').hidden = false;
   }
 
   function leerUrl() {
     var url = $('url').value.trim();
     $('avisoUrl').hidden = true;
     if (!url) {
-      $('meta').hidden = true;
+      $('lectura').hidden = true;
       estado.meta = {};
       guardar();
+      pintarLista();
       return;
     }
 
@@ -755,16 +1067,17 @@ window.MOCK_API = {
 
     api('leerUrl', url).then(function (r) {
       if (r.ok) {
-        pintarMeta(r);
+        pintarLectura(r);
         toast('Datos leídos de ' + (r.sitio || 'la página'));
       } else {
-        pintarMeta({ sitio: r.sitio || '', titulo: '', descripcion: '', precio: '' });
-        $('avisoUrl').textContent = r.error + ' La URL sigue funcionando en los prompts.';
+        pintarLectura({ sitio: r.sitio || '', titulo: '', descripcion: '', precio: '' });
+        $('avisoUrl').textContent = r.error + ' La URL se sigue insertando en los prompts.';
         $('avisoUrl').hidden = false;
       }
       guardar();
+      pintarLista();
     }).catch(function (e) {
-      $('avisoUrl').textContent = 'Error al leer la URL: ' + (e.message || e);
+      $('avisoUrl').textContent = 'Error al leer la URL: ' + ((e && e.message) || e);
       $('avisoUrl').hidden = false;
     }).then(function () {
       b.disabled = false;
@@ -777,6 +1090,9 @@ window.MOCK_API = {
     $('estado').textContent = forzar ? 'Recargando…' : 'Cargando prompts…';
     return api('getPrompts', !!forzar).then(function (lista) {
       estado.prompts = lista || [];
+      $('lema').textContent = estado.prompts.length +
+        ' plantillas que se rellenan solas con el producto y la URL.';
+      pintarChips();
       pintarLista();
     }).catch(function (e) {
       var msg = (e && e.message) || String(e);
@@ -791,6 +1107,7 @@ window.MOCK_API = {
   function iniciar() {
     restaurar();
 
+    var reloj;
     ['producto', 'url', 'extra', 'mTitulo', 'mDescripcion', 'mPrecio'].forEach(function (id) {
       $(id).addEventListener('input', function () {
         estado.meta = {
@@ -800,6 +1117,8 @@ window.MOCK_API = {
           sitio: $('metaSitio').textContent
         };
         guardar();
+        clearTimeout(reloj);
+        reloj = setTimeout(pintarLista, 280);
       });
     });
 
@@ -814,9 +1133,7 @@ window.MOCK_API = {
     });
 
     $('btnRecargar').addEventListener('click', function () { cargarPrompts(true); });
-
     $('dlgCerrar').addEventListener('click', function () { $('modal').close(); });
-    $('dlgCerrar2').addEventListener('click', function () { $('modal').close(); });
     $('dlgCopiar').addEventListener('click', function () {
       copiar($('dlgTexto').value).then(function () {
         toast('Prompt copiado');
@@ -829,7 +1146,7 @@ window.MOCK_API = {
     });
 
     document.addEventListener('keydown', function (e) {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         $('buscar').focus();
       }
@@ -840,7 +1157,7 @@ window.MOCK_API = {
         $('linkHoja').href = s.hojaUrl;
         $('linkHoja').hidden = false;
       }
-    }).catch(function () { /* sin link, no pasa nada */ });
+    }).catch(function () { /* sin enlace, no pasa nada */ });
 
     cargarPrompts(false);
   }
