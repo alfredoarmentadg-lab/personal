@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Asistente de Prompts</title>
+  <?!= include('Estilos'); ?>
+</head>
+<body>
+
+  <header class="top">
+    <div class="top-in">
+      <div class="marca">
+        <span class="punto"></span>
+        <h1>Asistente de Prompts</h1>
+        <a id="linkHoja" class="fantasma" target="_blank" rel="noopener" hidden>Editar prompts ↗</a>
+        <button id="btnRecargar" class="fantasma" title="Volver a leer el Sheet">↻ Recargar</button>
+      </div>
+
+      <div class="campos">
+        <label class="campo">
+          <span>Producto <b>*</b></span>
+          <input id="producto" autocomplete="off" placeholder="Cafetera de goteo Cecotec Coffee 66">
+        </label>
+        <label class="campo campo-url">
+          <span>URL de referencia</span>
+          <div class="fila-url">
+            <input id="url" type="url" autocomplete="off" placeholder="https://...">
+            <button id="btnLeer" class="btn-sec">Leer URL</button>
+          </div>
+        </label>
+      </div>
+
+      <div id="meta" class="meta" hidden>
+        <div class="meta-cab">
+          <strong>Datos leídos de <span id="metaSitio">la página</span></strong>
+          <span>· edítalos si vienen mal, se usan tal cual</span>
+        </div>
+        <div class="meta-grid">
+          <label class="campo"><span>Título</span><input id="mTitulo" autocomplete="off"></label>
+          <label class="campo"><span>Descripción</span><input id="mDescripcion" autocomplete="off"></label>
+          <label class="campo"><span>Precio</span><input id="mPrecio" autocomplete="off"></label>
+        </div>
+      </div>
+
+      <div id="avisoUrl" class="aviso" hidden></div>
+
+      <details class="extra">
+        <summary>Notas extra</summary>
+        <label class="campo">
+          <textarea id="extra" placeholder="Contexto que quieras meter en todos los prompts: público, ángulo, restricciones..."></textarea>
+        </label>
+      </details>
+    </div>
+  </header>
+
+  <main>
+    <div class="barra">
+      <input id="buscar" type="search" placeholder="Buscar prompt por nombre o categoría...">
+      <span id="contador"></span>
+    </div>
+    <div id="lista"></div>
+    <div id="estado" class="estado">Cargando prompts…</div>
+  </main>
+
+  <dialog id="modal">
+    <div class="dlg-cab">
+      <h2 id="dlgTitulo">Vista previa</h2>
+      <button id="dlgCerrar" class="fantasma">✕</button>
+    </div>
+    <div class="dlg-cuerpo">
+      <textarea id="dlgTexto" spellcheck="false"></textarea>
+    </div>
+    <div class="dlg-pie">
+      <button id="dlgCerrar2" class="btn-sec">Cerrar</button>
+      <button id="dlgCopiar" class="btn">Copiar</button>
+    </div>
+  </dialog>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <?!= include('App'); ?>
+</body>
+</html>

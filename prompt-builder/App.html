@@ -1,0 +1,349 @@
+<script>
+(function () {
+  'use strict';
+
+  var estado = { prompts: [], filtro: '', meta: {}, promptActual: null };
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* ── Puente con el backend (o con el mock en la vista previa) ── */
+  function api(nombre) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    return new Promise(function (ok, mal) {
+      if (window.MOCK_API && window.MOCK_API[nombre]) {
+        setTimeout(function () {
+          try { ok(window.MOCK_API[nombre].apply(null, args)); }
+          catch (e) { mal(e); }
+        }, window.MOCK_API.__retardo || 250);
+        return;
+      }
+      google.script.run.withSuccessHandler(ok).withFailureHandler(mal)[nombre].apply(null, args);
+    });
+  }
+
+  /* ── Almacenamiento local (sobrevive a recargas) ── */
+  function guardar() {
+    try {
+      localStorage.setItem('asistente-prompts', JSON.stringify({
+        producto: $('producto').value,
+        url: $('url').value,
+        extra: $('extra').value,
+        meta: estado.meta
+      }));
+    } catch (e) { /* modo incógnito */ }
+  }
+
+  function restaurar() {
+    var d;
+    try { d = JSON.parse(localStorage.getItem('asistente-prompts') || '{}'); }
+    catch (e) { d = {}; }
+    $('producto').value = d.producto || '';
+    $('url').value = d.url || '';
+    $('extra').value = d.extra || '';
+    if (d.extra) $('extra').closest('details').open = true;
+    if (d.meta && (d.meta.titulo || d.meta.descripcion || d.meta.precio)) {
+      pintarMeta(d.meta);
+    }
+  }
+
+  /* ── Variables disponibles en las plantillas ── */
+  function variables() {
+    var url = $('url').value.trim();
+    var dominio = '';
+    var m = url.match(/^https?:\/\/([^\/\?#:]+)/i);
+    if (m) dominio = m[1].replace(/^www\./i, '');
+    var hoy = new Date();
+    var iso = hoy.getFullYear() + '-' +
+      String(hoy.getMonth() + 1).padStart(2, '0') + '-' +
+      String(hoy.getDate()).padStart(2, '0');
+
+    return {
+      producto: $('producto').value.trim(),
+      url: url,
+      titulo: $('mTitulo').value.trim(),
+      descripcion: $('mDescripcion').value.trim(),
+      precio: $('mPrecio').value.trim(),
+      sitio: dominio,
+      extra: $('extra').value.trim(),
+      fecha: iso
+    };
+  }
+
+  /**
+   * Rellena la plantilla. Si una línea contiene SOLO variables vacías,
+   * la línea entera desaparece (no quedan etiquetas huérfanas tipo "Precio:").
+   */
+  function rellenar(plantilla, vars) {
+    var patron = /\{\{\s*(\w+)\s*\}\}/g;
+    var salida = String(plantilla).split('\n').filter(function (linea) {
+      var usadas = linea.match(patron);
+      if (!usadas) return true;
+      return usadas.some(function (t) {
+        var clave = t.replace(/[{}\s]/g, '');
+        return String(vars[clave] || '').trim() !== '';
+      });
+    }).map(function (linea) {
+      return linea.replace(patron, function (_, clave) {
+        return vars[clave] != null ? vars[clave] : '';
+      });
+    });
+
+    return salida.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+  }
+
+  /* ── Copiar al portapapeles, con dos planes B ── */
+  function copiar(texto) {
+    return new Promise(function (ok, mal) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(texto).then(ok).catch(function () { viejaEscuela(texto, ok, mal); });
+      } else {
+        viejaEscuela(texto, ok, mal);
+      }
+    });
+  }
+
+  function viejaEscuela(texto, ok, mal) {
+    var ta = document.createElement('textarea');
+    ta.value = texto;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, texto.length);
+    var bien = false;
+    try { bien = document.execCommand('copy'); } catch (e) { bien = false; }
+    document.body.removeChild(ta);
+    bien ? ok() : mal(new Error('sin-portapapeles'));
+  }
+
+  /* ── Avisos ── */
+  var relojToast;
+  function toast(texto, malo) {
+    var t = $('toast');
+    t.textContent = texto;
+    t.className = 'ver' + (malo ? ' malo' : '');
+    clearTimeout(relojToast);
+    relojToast = setTimeout(function () { t.className = ''; }, 2600);
+  }
+
+  /* ── Pintar la lista ── */
+  function pintarLista() {
+    var cont = $('lista');
+    var q = estado.filtro.toLowerCase();
+    var visibles = estado.prompts.filter(function (p) {
+      if (!q) return true;
+      return (p.nombre + ' ' + p.categoria + ' ' + p.descripcion + ' ' + p.destino).toLowerCase().indexOf(q) > -1;
+    });
+
+    $('contador').textContent = visibles.length + (visibles.length === 1 ? ' prompt' : ' prompts');
+    cont.innerHTML = '';
+
+    if (!visibles.length) {
+      $('estado').hidden = false;
+      $('estado').innerHTML = estado.prompts.length
+        ? 'Ningún prompt coincide con «' + escapar(estado.filtro) + '».'
+        : 'La hoja está vacía. Añade filas en el Sheet y pulsa Recargar.';
+      return;
+    }
+    $('estado').hidden = true;
+
+    var categoriaActual = null;
+    var grupo = null;
+
+    visibles.forEach(function (p) {
+      if (p.categoria !== categoriaActual) {
+        categoriaActual = p.categoria;
+        var h = document.createElement('div');
+        h.className = 'cat';
+        h.textContent = p.categoria;
+        cont.appendChild(h);
+        grupo = document.createElement('div');
+        grupo.className = 'tarjetas';
+        cont.appendChild(grupo);
+      }
+
+      var card = document.createElement('article');
+      card.className = 'tarjeta';
+      card.innerHTML =
+        (p.destino ? '<span class="badge">' + escapar(p.destino) + '</span>' : '') +
+        '<h3>' + escapar(p.nombre) + '</h3>' +
+        '<p>' + escapar(p.descripcion || '') + '</p>' +
+        '<div class="acciones">' +
+        '  <button class="btn" data-accion="copiar">Copiar</button>' +
+        '  <button class="btn-sec" data-accion="ver">Ver</button>' +
+        '</div>';
+
+      card.querySelector('[data-accion="copiar"]').addEventListener('click', function (ev) {
+        alCopiar(p, ev.currentTarget);
+      });
+      card.querySelector('[data-accion="ver"]').addEventListener('click', function () {
+        abrirModal(p);
+      });
+
+      grupo.appendChild(card);
+    });
+  }
+
+  function escapar(t) {
+    return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  /* ── Acciones ── */
+  function faltaProducto() {
+    if ($('producto').value.trim()) return false;
+    $('producto').classList.add('falta');
+    $('producto').focus();
+    toast('Escribe primero el nombre del producto', true);
+    setTimeout(function () { $('producto').classList.remove('falta'); }, 1800);
+    return true;
+  }
+
+  function alCopiar(p, boton) {
+    if (faltaProducto()) return;
+    var texto = rellenar(p.plantilla, variables());
+    copiar(texto).then(function () {
+      var antes = boton.textContent;
+      boton.textContent = '✓ Copiado';
+      boton.classList.add('hecho');
+      setTimeout(function () {
+        boton.textContent = antes;
+        boton.classList.remove('hecho');
+      }, 1600);
+      toast('Prompt copiado (' + texto.length + ' caracteres)');
+    }).catch(function () {
+      abrirModal(p, true);
+      toast('Tu navegador bloqueó el portapapeles: copia desde aquí', true);
+    });
+  }
+
+  function abrirModal(p, seleccionar) {
+    if (faltaProducto()) return;
+    estado.promptActual = p;
+    $('dlgTitulo').textContent = p.nombre;
+    $('dlgTexto').value = rellenar(p.plantilla, variables());
+    $('modal').showModal();
+    if (seleccionar) {
+      $('dlgTexto').focus();
+      $('dlgTexto').select();
+    }
+  }
+
+  function pintarMeta(datos) {
+    estado.meta = datos || {};
+    $('mTitulo').value = datos.titulo || '';
+    $('mDescripcion').value = datos.descripcion || '';
+    $('mPrecio').value = datos.precio || '';
+    $('metaSitio').textContent = datos.sitio || 'la página';
+    $('meta').hidden = false;
+  }
+
+  function leerUrl() {
+    var url = $('url').value.trim();
+    $('avisoUrl').hidden = true;
+    if (!url) {
+      $('meta').hidden = true;
+      estado.meta = {};
+      guardar();
+      return;
+    }
+
+    var b = $('btnLeer');
+    b.disabled = true;
+    b.textContent = 'Leyendo…';
+
+    api('leerUrl', url).then(function (r) {
+      if (r.ok) {
+        pintarMeta(r);
+        toast('Datos leídos de ' + (r.sitio || 'la página'));
+      } else {
+        pintarMeta({ sitio: r.sitio || '', titulo: '', descripcion: '', precio: '' });
+        $('avisoUrl').textContent = r.error + ' La URL sigue funcionando en los prompts.';
+        $('avisoUrl').hidden = false;
+      }
+      guardar();
+    }).catch(function (e) {
+      $('avisoUrl').textContent = 'Error al leer la URL: ' + (e.message || e);
+      $('avisoUrl').hidden = false;
+    }).then(function () {
+      b.disabled = false;
+      b.textContent = 'Leer URL';
+    });
+  }
+
+  function cargarPrompts(forzar) {
+    $('estado').hidden = false;
+    $('estado').textContent = forzar ? 'Recargando…' : 'Cargando prompts…';
+    return api('getPrompts', !!forzar).then(function (lista) {
+      estado.prompts = lista || [];
+      pintarLista();
+    }).catch(function (e) {
+      var msg = (e && e.message) || String(e);
+      $('estado').innerHTML = msg.indexOf('No hay hoja') > -1
+        ? 'Todavía no hay hoja de prompts.<br>Abre el editor de Apps Script y ejecuta <code>crearHojaDePrompts()</code>.'
+        : 'No pude leer los prompts:<br>' + escapar(msg);
+      $('estado').hidden = false;
+    });
+  }
+
+  /* ── Arranque ── */
+  function iniciar() {
+    restaurar();
+
+    ['producto', 'url', 'extra', 'mTitulo', 'mDescripcion', 'mPrecio'].forEach(function (id) {
+      $(id).addEventListener('input', function () {
+        estado.meta = {
+          titulo: $('mTitulo').value,
+          descripcion: $('mDescripcion').value,
+          precio: $('mPrecio').value,
+          sitio: $('metaSitio').textContent
+        };
+        guardar();
+      });
+    });
+
+    $('btnLeer').addEventListener('click', leerUrl);
+    $('url').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); leerUrl(); }
+    });
+
+    $('buscar').addEventListener('input', function (e) {
+      estado.filtro = e.target.value.trim();
+      pintarLista();
+    });
+
+    $('btnRecargar').addEventListener('click', function () { cargarPrompts(true); });
+
+    $('dlgCerrar').addEventListener('click', function () { $('modal').close(); });
+    $('dlgCerrar2').addEventListener('click', function () { $('modal').close(); });
+    $('dlgCopiar').addEventListener('click', function () {
+      copiar($('dlgTexto').value).then(function () {
+        toast('Prompt copiado');
+        $('modal').close();
+      }).catch(function () {
+        $('dlgTexto').focus();
+        $('dlgTexto').select();
+        toast('Pulsa Ctrl+C / Cmd+C para copiar', true);
+      });
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        $('buscar').focus();
+      }
+    });
+
+    api('getEstado').then(function (s) {
+      if (s && s.hojaUrl) {
+        $('linkHoja').href = s.hojaUrl;
+        $('linkHoja').hidden = false;
+      }
+    }).catch(function () { /* sin link, no pasa nada */ });
+
+    cargarPrompts(false);
+  }
+
+  document.addEventListener('DOMContentLoaded', iniciar);
+})();
+</script>

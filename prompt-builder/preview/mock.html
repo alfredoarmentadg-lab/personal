@@ -1,0 +1,85 @@
+<script>
+/* Solo en la vista previa: deja la app abierta con un ejemplo cargado */
+try {
+  if (!localStorage.getItem('asistente-prompts')) {
+    localStorage.setItem('asistente-prompts', JSON.stringify({
+      producto: 'Cafetera de goteo Cecotec Coffee 66',
+      url: 'https://tienda-ejemplo.com/cafetera-goteo-66',
+      extra: 'Público: gente que teletrabaja y hace 3-4 cafés al día en casa.',
+      meta: {
+        titulo: 'Cafetera de goteo con jarra de cristal 1,5 L y filtro permanente',
+        descripcion: 'Cafetera de goteo de 950 W con capacidad para 12 tazas, sistema antigoteo, filtro lavable y placa calefactora que mantiene el café caliente 40 minutos.',
+        precio: '39.90 EUR',
+        sitio: 'tienda-ejemplo.com'
+      }
+    }));
+  }
+} catch (e) {}
+</script>
+
+<script>
+/* Datos falsos solo para la vista previa. El backend real vive en Codigo.gs */
+window.MOCK_API = {
+  __retardo: 300,
+
+  getEstado: function () {
+    return { hayHoja: true, hojaUrl: 'https://docs.google.com/spreadsheets/' };
+  },
+
+  getPrompts: function () {
+    return [
+      { id: 'p1', categoria: 'Pinterest', nombre: 'Títulos de pin (5 variantes)', destino: 'ChatGPT',
+        descripcion: 'Cinco títulos con la keyword al inicio, sin lenguaje de folleto.', orden: 1,
+        plantilla:
+'Escribe 5 títulos de pin de Pinterest para este producto:\n\nProducto: {{producto}}\nPágina: {{url}}\nTítulo de la página: {{titulo}}\nDescripción: {{descripcion}}\nPrecio: {{precio}}\nNotas: {{extra}}\n\nReglas:\n- Máximo 40 caracteres cada uno.\n- La palabra clave principal va al principio, no al final.\n- Nada de "descubre", "transforma", "eleva", "revoluciona".\n- Prohibido el molde "Verbo: producto".\n- Que se lean como algo que escribiría una persona buscando eso en Google.\n\nDevuélvelos en lista numerada, sin explicaciones.' },
+
+      { id: 'p2', categoria: 'Pinterest', nombre: 'Descripción de pin + hashtags', destino: 'ChatGPT',
+        descripcion: 'Descripción de 2 frases orientada a búsqueda.', orden: 2,
+        plantilla:
+'Escribe la descripción de un pin de Pinterest para: {{producto}}\n\nDatos de la página ({{sitio}}):\nTítulo: {{titulo}}\nDescripción: {{descripcion}}\nPrecio: {{precio}}\nURL: {{url}}\nNotas: {{extra}}\n\nFormato: 2 frases (máx. 180 caracteres en total) + 4 hashtags al final.\nLa primera frase tiene que contener la búsqueda real que haría alguien interesado.\nTono directo, sin adjetivos de catálogo. Español neutro.' },
+
+      { id: 'p3', categoria: 'Contenido', nombre: 'Esqueleto de reseña', destino: 'Claude',
+        descripcion: 'Estructura de artículo de reseña con secciones y ángulos.', orden: 1,
+        plantilla:
+'Necesito el esqueleto de una reseña honesta de: {{producto}}\n\nFuente: {{url}}\nTítulo de la página: {{titulo}}\nDescripción oficial: {{descripcion}}\nPrecio: {{precio}}\nContexto extra: {{extra}}\n\nDame:\n1. Tres ángulos posibles para el artículo, y cuál elegirías tú y por qué.\n2. El H1 y los H2 del ángulo ganador.\n3. Para cada H2, una frase con lo que va dentro.\n4. Las 3 objeciones que tendría alguien antes de comprarlo.\n5. Qué datos me faltan y tendría que verificar por mi cuenta.\n\nNo escribas todavía el artículo.' },
+
+      { id: 'p4', categoria: 'Contenido', nombre: 'Ficha comparativa', destino: 'Claude',
+        descripcion: 'Tabla pros/contras y para quién sí y para quién no.', orden: 2,
+        plantilla:
+'Analiza este producto y dame una ficha de decisión:\n\nProducto: {{producto}}\nURL: {{url}}\nTítulo: {{titulo}}\nDescripción: {{descripcion}}\nPrecio: {{precio}}\n\nEntrega:\n- Tabla de 4 pros y 4 contras concretos (nada de "buena calidad-precio").\n- "Para quién sí" y "para quién no", una frase cada uno.\n- Dos alternativas directas y en qué gana cada una.\n- Una pega real que la marca no menciona.' },
+
+      { id: 'p5', categoria: 'Email', nombre: 'Correo de recomendación', destino: 'ChatGPT',
+        descripcion: 'Email corto a la lista recomendando el producto.', orden: 1,
+        plantilla:
+'Escribe un correo corto para mi lista recomendando: {{producto}}\n\nEnlace: {{url}}\nDatos: {{titulo}} — {{descripcion}}\nPrecio: {{precio}}\nContexto mío: {{extra}}\n\nEstructura: asunto (máx. 45 caracteres, sin emoji), 120-160 palabras, un solo enlace, cierre con una pregunta.\nEmpieza contando cuándo lo usé o para qué lo busqué, no con la ficha técnica.\nSin "espero que estés bien", sin listas de beneficios, sin urgencia falsa.' },
+
+      { id: 'p6', categoria: 'Imagen', nombre: 'Prompt de imagen para el pin', destino: 'Midjourney',
+        descripcion: 'Prompt visual listo para Midjourney o similar.', orden: 1,
+        plantilla:
+'Prompt de imagen vertical 2:3 para un pin de Pinterest sobre {{producto}}.\nReferencia visual: {{url}}\nContexto: {{titulo}}. {{descripcion}}\nNotas: {{extra}}\n\nDescríbeme la escena en inglés, en una sola línea: sujeto, entorno, luz, paleta, ángulo de cámara y espacio libre arriba para el texto.\nSin texto ni logos dentro de la imagen. Estilo fotografía real, no ilustración 3D.' }
+    ];
+  },
+
+  leerUrl: function (url) {
+    var dominio = (String(url).match(/^https?:\/\/([^\/\?#:]+)/i) || [])[1] || '';
+    dominio = dominio.replace(/^www\./i, '');
+
+    if (/amazon\./i.test(dominio)) {
+      return { ok: false, sitio: dominio,
+        error: 'La página respondió 503. Ese sitio bloquea lectores automáticos: rellena los campos a mano.' };
+    }
+    if (!/^https?:\/\//i.test(String(url))) {
+      return { ok: false, error: 'La URL tiene que empezar por http:// o https://' };
+    }
+    return {
+      ok: true,
+      sitio: dominio,
+      titulo: 'Cafetera de goteo con jarra de cristal 1,5 L y filtro permanente',
+      descripcion: 'Cafetera de goteo de 950 W con capacidad para 12 tazas, sistema antigoteo, filtro lavable y placa calefactora que mantiene el café caliente 40 minutos.',
+      precio: '39.90 EUR',
+      imagen: '',
+      error: ''
+    };
+  }
+};
+</script>

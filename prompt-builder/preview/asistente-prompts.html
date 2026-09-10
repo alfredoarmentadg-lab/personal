@@ -1,0 +1,850 @@
+<title>Asistente de Prompts</title>
+
+<style>
+  /* Paleta heredada de la landing (index.html): navy + crema + terracota */
+  :root {
+    --navy: #2E4057;
+    --navy-2: #3a5070;
+    --terra: #D3756B;
+    --terra-dark: #bb5f55;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --linea: #e2ddd2;
+    --panel: #ffffff;
+    --fondo: #F4F1EA;
+    --ok: #2f7a5b;
+    --badge-bg: rgba(46,64,87,.09);
+    --toast-bg: #2E4057;
+    --toast-fg: #ffffff;
+    --radio: 8px;
+    --sombra: 0 1px 2px rgba(46,64,87,.08), 0 4px 14px rgba(46,64,87,.06);
+  }
+
+  /* Tema oscuro: por preferencia del sistema... */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --navy: #dfe4ec;
+      --navy-2: #b9c3d2;
+      --text: #e8e6e1;
+      --muted: #9aa3b2;
+      --linea: #2b323f;
+      --panel: #1b202a;
+      --fondo: #12151b;
+      --badge-bg: rgba(255,255,255,.09);
+      --toast-bg: #e8e6e1;
+      --toast-fg: #12151b;
+      --sombra: 0 1px 2px rgba(0,0,0,.3), 0 4px 14px rgba(0,0,0,.25);
+    }
+  }
+
+  /* ...y por elección explícita del visor. */
+  :root[data-theme="dark"] {
+    --navy: #dfe4ec;
+    --navy-2: #b9c3d2;
+    --text: #e8e6e1;
+    --muted: #9aa3b2;
+    --linea: #2b323f;
+    --panel: #1b202a;
+    --fondo: #12151b;
+    --badge-bg: rgba(255,255,255,.09);
+    --toast-bg: #e8e6e1;
+    --toast-fg: #12151b;
+    --sombra: 0 1px 2px rgba(0,0,0,.3), 0 4px 14px rgba(0,0,0,.25);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--fondo);
+    color: var(--text);
+    line-height: 1.55;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button, input, textarea { font: inherit; color: inherit; }
+
+  /* ── Cabecera ── */
+  .top {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--panel);
+    border-bottom: 1px solid var(--linea);
+    box-shadow: var(--sombra);
+  }
+  .top-in { max-width: 1000px; margin: 0 auto; padding: 14px 16px 16px; }
+
+  .marca { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .marca h1 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: -.01em;
+    flex: 1;
+    min-width: 0;
+  }
+  .punto {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--terra);
+    flex: none;
+  }
+
+  .campos { display: flex; gap: 12px; flex-wrap: wrap; }
+  .campo { display: flex; flex-direction: column; gap: 4px; flex: 1 1 220px; min-width: 0; }
+  .campo-url { flex: 1.4 1 280px; }
+  .campo > span {
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .campo b { color: var(--terra); }
+  .campo input, .campo textarea {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1px solid var(--linea);
+    border-radius: var(--radio);
+    background: var(--fondo);
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .campo input:focus, .campo textarea:focus, #buscar:focus {
+    border-color: var(--terra);
+    box-shadow: 0 0 0 3px rgba(211,117,107,.16);
+  }
+  .campo input.falta { border-color: var(--terra); background: rgba(211,117,107,.08); }
+  .fila-url { display: flex; gap: 8px; }
+  .fila-url input { flex: 1; min-width: 0; }
+
+  /* ── Botones ── */
+  .btn, .btn-sec, .fantasma {
+    border: none;
+    border-radius: var(--radio);
+    cursor: pointer;
+    font-weight: 600;
+    transition: background .15s, transform .1s, border-color .15s;
+    white-space: nowrap;
+  }
+  .btn { background: var(--terra); color: #fff; padding: 9px 16px; }
+  .btn:hover { background: var(--terra-dark); }
+  .btn:active { transform: translateY(1px); }
+  .btn-sec {
+    background: transparent;
+    color: var(--navy);
+    border: 1px solid var(--linea);
+    padding: 9px 14px;
+  }
+  .btn-sec:hover { border-color: var(--terra); color: var(--terra); }
+  .fantasma {
+    background: transparent;
+    color: var(--muted);
+    padding: 5px 9px;
+    font-size: .82rem;
+    border: 1px solid transparent;
+    text-decoration: none;
+  }
+  .fantasma:hover { color: var(--terra); border-color: var(--linea); }
+  button:disabled { opacity: .5; cursor: progress; }
+
+  /* ── Metadatos extraídos ── */
+  .meta {
+    margin-top: 12px;
+    padding: 12px;
+    border: 1px dashed var(--linea);
+    border-radius: var(--radio);
+    background: var(--fondo);
+  }
+  .meta-cab {
+    display: flex; align-items: center; gap: 4px 8px; flex-wrap: wrap;
+    font-size: .74rem; color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .meta-cab strong { color: var(--text); font-size: .8rem; }
+  .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+  .meta-grid .campo input { background: var(--panel); }
+  .aviso {
+    margin-top: 10px;
+    padding: 9px 11px;
+    border-radius: var(--radio);
+    background: rgba(211,117,107,.12);
+    border: 1px solid rgba(211,117,107,.3);
+    font-size: .84rem;
+  }
+
+  .extra { margin-top: 10px; }
+  .extra summary {
+    cursor: pointer;
+    font-size: .78rem;
+    color: var(--muted);
+    font-weight: 600;
+    list-style: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 0;
+  }
+  .extra summary::before { content: '▸'; transition: transform .15s; }
+  .extra[open] summary::before { transform: rotate(90deg); }
+  .extra textarea { margin-top: 6px; resize: vertical; min-height: 62px; }
+
+  /* ── Lista ── */
+  main { max-width: 1000px; margin: 0 auto; padding: 18px 16px 80px; }
+
+  .barra { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; }
+  #buscar {
+    flex: 1;
+    padding: 9px 12px;
+    border: 1px solid var(--linea);
+    border-radius: var(--radio);
+    background: var(--panel);
+    outline: none;
+  }
+  #contador { font-size: .78rem; color: var(--muted); white-space: nowrap; }
+
+  .cat {
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .09em;
+    color: var(--muted);
+    font-weight: 700;
+    margin: 22px 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .cat::after { content: ''; flex: 1; height: 1px; background: var(--linea); }
+  .cat:first-child { margin-top: 0; }
+
+  .tarjetas { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+
+  .tarjeta {
+    background: var(--panel);
+    border: 1px solid var(--linea);
+    border-radius: var(--radio);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: var(--sombra);
+    transition: border-color .15s, transform .1s;
+  }
+  .tarjeta:hover { border-color: var(--terra); }
+  .tarjeta h3 { font-size: .95rem; color: var(--navy); line-height: 1.35; }
+  .tarjeta p { font-size: .83rem; color: var(--muted); flex: 1; }
+  .badge {
+    display: inline-block;
+    align-self: flex-start;
+    font-size: .66rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 99px;
+    background: var(--badge-bg);
+    color: var(--navy-2);
+  }
+  .acciones { display: flex; gap: 8px; margin-top: 4px; }
+  .acciones .btn { flex: 1; text-align: center; }
+  .acciones .btn.hecho { background: var(--ok); }
+
+  .estado { text-align: center; padding: 40px 16px; color: var(--muted); }
+  .estado code {
+    font-family: 'Courier New', monospace;
+    background: var(--panel);
+    border: 1px solid var(--linea);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .estado .btn { margin-top: 14px; }
+
+  /* ── Vista previa ── */
+  dialog {
+    border: none;
+    border-radius: 12px;
+    padding: 0;
+    width: min(720px, 92vw);
+    background: var(--panel);
+    color: var(--text);
+    box-shadow: 0 20px 60px rgba(0,0,0,.3);
+  }
+  dialog::backdrop { background: rgba(26,26,46,.55); }
+  .dlg-cab {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--linea);
+  }
+  .dlg-cab h2 { font-size: .95rem; color: var(--navy); flex: 1; }
+  .dlg-cuerpo { padding: 16px; }
+  .dlg-cuerpo textarea {
+    width: 100%;
+    min-height: 46vh;
+    border: 1px solid var(--linea);
+    border-radius: var(--radio);
+    background: var(--fondo);
+    padding: 12px;
+    font-family: 'Courier New', monospace;
+    font-size: .84rem;
+    line-height: 1.55;
+    resize: vertical;
+    outline: none;
+  }
+  .dlg-pie { display: flex; gap: 8px; justify-content: flex-end; padding: 0 16px 16px; }
+
+  /* ── Toast ── */
+  #toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translate(-50%, 20px);
+    background: var(--toast-bg);
+    color: var(--toast-fg);
+    padding: 10px 18px;
+    border-radius: 99px;
+    font-size: .86rem;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s, transform .2s;
+    z-index: 50;
+    max-width: 90vw;
+    text-align: center;
+  }
+  #toast.ver { opacity: 1; transform: translate(-50%, 0); }
+  #toast.malo { background: var(--terra-dark); }
+
+  :where(button, a, input, textarea, summary):focus-visible {
+    outline: 2px solid var(--terra);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      transition-duration: .01ms !important;
+      animation-duration: .01ms !important;
+    }
+  }
+
+  @media (max-width: 560px) {
+    /* En columna, flex-basis mide alto: hay que anularlo o los campos se inflan */
+    .campos { flex-direction: column; gap: 10px; }
+    .campos > .campo, .campo-url { flex: 0 0 auto; width: 100%; }
+
+    .marca { flex-wrap: wrap; row-gap: 6px; }
+    .marca h1 { flex: 1 0 auto; white-space: nowrap; font-size: 1rem; }
+    .fantasma { font-size: .76rem; padding: 4px 7px; }
+
+    .tarjetas { grid-template-columns: 1fr; }
+    .barra { flex-wrap: wrap; }
+    .dlg-cuerpo textarea { min-height: 40vh; }
+  }
+</style>
+
+<header class="top">
+    <div class="top-in">
+      <div class="marca">
+        <span class="punto"></span>
+        <h1>Asistente de Prompts</h1>
+        <a id="linkHoja" class="fantasma" target="_blank" rel="noopener" hidden>Editar prompts ↗</a>
+        <button id="btnRecargar" class="fantasma" title="Volver a leer el Sheet">↻ Recargar</button>
+      </div>
+
+      <div class="campos">
+        <label class="campo">
+          <span>Producto <b>*</b></span>
+          <input id="producto" autocomplete="off" placeholder="Cafetera de goteo Cecotec Coffee 66">
+        </label>
+        <label class="campo campo-url">
+          <span>URL de referencia</span>
+          <div class="fila-url">
+            <input id="url" type="url" autocomplete="off" placeholder="https://...">
+            <button id="btnLeer" class="btn-sec">Leer URL</button>
+          </div>
+        </label>
+      </div>
+
+      <div id="meta" class="meta" hidden>
+        <div class="meta-cab">
+          <strong>Datos leídos de <span id="metaSitio">la página</span></strong>
+          <span>· edítalos si vienen mal, se usan tal cual</span>
+        </div>
+        <div class="meta-grid">
+          <label class="campo"><span>Título</span><input id="mTitulo" autocomplete="off"></label>
+          <label class="campo"><span>Descripción</span><input id="mDescripcion" autocomplete="off"></label>
+          <label class="campo"><span>Precio</span><input id="mPrecio" autocomplete="off"></label>
+        </div>
+      </div>
+
+      <div id="avisoUrl" class="aviso" hidden></div>
+
+      <details class="extra">
+        <summary>Notas extra</summary>
+        <label class="campo">
+          <textarea id="extra" placeholder="Contexto que quieras meter en todos los prompts: público, ángulo, restricciones..."></textarea>
+        </label>
+      </details>
+    </div>
+  </header>
+
+  <main>
+    <div class="barra">
+      <input id="buscar" type="search" placeholder="Buscar prompt por nombre o categoría...">
+      <span id="contador"></span>
+    </div>
+    <div id="lista"></div>
+    <div id="estado" class="estado">Cargando prompts…</div>
+  </main>
+
+  <dialog id="modal">
+    <div class="dlg-cab">
+      <h2 id="dlgTitulo">Vista previa</h2>
+      <button id="dlgCerrar" class="fantasma">✕</button>
+    </div>
+    <div class="dlg-cuerpo">
+      <textarea id="dlgTexto" spellcheck="false"></textarea>
+    </div>
+    <div class="dlg-pie">
+      <button id="dlgCerrar2" class="btn-sec">Cerrar</button>
+      <button id="dlgCopiar" class="btn">Copiar</button>
+    </div>
+  </dialog>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* Solo en la vista previa: deja la app abierta con un ejemplo cargado */
+try {
+  if (!localStorage.getItem('asistente-prompts')) {
+    localStorage.setItem('asistente-prompts', JSON.stringify({
+      producto: 'Cafetera de goteo Cecotec Coffee 66',
+      url: 'https://tienda-ejemplo.com/cafetera-goteo-66',
+      extra: 'Público: gente que teletrabaja y hace 3-4 cafés al día en casa.',
+      meta: {
+        titulo: 'Cafetera de goteo con jarra de cristal 1,5 L y filtro permanente',
+        descripcion: 'Cafetera de goteo de 950 W con capacidad para 12 tazas, sistema antigoteo, filtro lavable y placa calefactora que mantiene el café caliente 40 minutos.',
+        precio: '39.90 EUR',
+        sitio: 'tienda-ejemplo.com'
+      }
+    }));
+  }
+} catch (e) {}
+</script>
+
+<script>
+/* Datos falsos solo para la vista previa. El backend real vive en Codigo.gs */
+window.MOCK_API = {
+  __retardo: 300,
+
+  getEstado: function () {
+    return { hayHoja: true, hojaUrl: 'https://docs.google.com/spreadsheets/' };
+  },
+
+  getPrompts: function () {
+    return [
+      { id: 'p1', categoria: 'Pinterest', nombre: 'Títulos de pin (5 variantes)', destino: 'ChatGPT',
+        descripcion: 'Cinco títulos con la keyword al inicio, sin lenguaje de folleto.', orden: 1,
+        plantilla:
+'Escribe 5 títulos de pin de Pinterest para este producto:\n\nProducto: {{producto}}\nPágina: {{url}}\nTítulo de la página: {{titulo}}\nDescripción: {{descripcion}}\nPrecio: {{precio}}\nNotas: {{extra}}\n\nReglas:\n- Máximo 40 caracteres cada uno.\n- La palabra clave principal va al principio, no al final.\n- Nada de "descubre", "transforma", "eleva", "revoluciona".\n- Prohibido el molde "Verbo: producto".\n- Que se lean como algo que escribiría una persona buscando eso en Google.\n\nDevuélvelos en lista numerada, sin explicaciones.' },
+
+      { id: 'p2', categoria: 'Pinterest', nombre: 'Descripción de pin + hashtags', destino: 'ChatGPT',
+        descripcion: 'Descripción de 2 frases orientada a búsqueda.', orden: 2,
+        plantilla:
+'Escribe la descripción de un pin de Pinterest para: {{producto}}\n\nDatos de la página ({{sitio}}):\nTítulo: {{titulo}}\nDescripción: {{descripcion}}\nPrecio: {{precio}}\nURL: {{url}}\nNotas: {{extra}}\n\nFormato: 2 frases (máx. 180 caracteres en total) + 4 hashtags al final.\nLa primera frase tiene que contener la búsqueda real que haría alguien interesado.\nTono directo, sin adjetivos de catálogo. Español neutro.' },
+
+      { id: 'p3', categoria: 'Contenido', nombre: 'Esqueleto de reseña', destino: 'Claude',
+        descripcion: 'Estructura de artículo de reseña con secciones y ángulos.', orden: 1,
+        plantilla:
+'Necesito el esqueleto de una reseña honesta de: {{producto}}\n\nFuente: {{url}}\nTítulo de la página: {{titulo}}\nDescripción oficial: {{descripcion}}\nPrecio: {{precio}}\nContexto extra: {{extra}}\n\nDame:\n1. Tres ángulos posibles para el artículo, y cuál elegirías tú y por qué.\n2. El H1 y los H2 del ángulo ganador.\n3. Para cada H2, una frase con lo que va dentro.\n4. Las 3 objeciones que tendría alguien antes de comprarlo.\n5. Qué datos me faltan y tendría que verificar por mi cuenta.\n\nNo escribas todavía el artículo.' },
+
+      { id: 'p4', categoria: 'Contenido', nombre: 'Ficha comparativa', destino: 'Claude',
+        descripcion: 'Tabla pros/contras y para quién sí y para quién no.', orden: 2,
+        plantilla:
+'Analiza este producto y dame una ficha de decisión:\n\nProducto: {{producto}}\nURL: {{url}}\nTítulo: {{titulo}}\nDescripción: {{descripcion}}\nPrecio: {{precio}}\n\nEntrega:\n- Tabla de 4 pros y 4 contras concretos (nada de "buena calidad-precio").\n- "Para quién sí" y "para quién no", una frase cada uno.\n- Dos alternativas directas y en qué gana cada una.\n- Una pega real que la marca no menciona.' },
+
+      { id: 'p5', categoria: 'Email', nombre: 'Correo de recomendación', destino: 'ChatGPT',
+        descripcion: 'Email corto a la lista recomendando el producto.', orden: 1,
+        plantilla:
+'Escribe un correo corto para mi lista recomendando: {{producto}}\n\nEnlace: {{url}}\nDatos: {{titulo}} — {{descripcion}}\nPrecio: {{precio}}\nContexto mío: {{extra}}\n\nEstructura: asunto (máx. 45 caracteres, sin emoji), 120-160 palabras, un solo enlace, cierre con una pregunta.\nEmpieza contando cuándo lo usé o para qué lo busqué, no con la ficha técnica.\nSin "espero que estés bien", sin listas de beneficios, sin urgencia falsa.' },
+
+      { id: 'p6', categoria: 'Imagen', nombre: 'Prompt de imagen para el pin', destino: 'Midjourney',
+        descripcion: 'Prompt visual listo para Midjourney o similar.', orden: 1,
+        plantilla:
+'Prompt de imagen vertical 2:3 para un pin de Pinterest sobre {{producto}}.\nReferencia visual: {{url}}\nContexto: {{titulo}}. {{descripcion}}\nNotas: {{extra}}\n\nDescríbeme la escena en inglés, en una sola línea: sujeto, entorno, luz, paleta, ángulo de cámara y espacio libre arriba para el texto.\nSin texto ni logos dentro de la imagen. Estilo fotografía real, no ilustración 3D.' }
+    ];
+  },
+
+  leerUrl: function (url) {
+    var dominio = (String(url).match(/^https?:\/\/([^\/\?#:]+)/i) || [])[1] || '';
+    dominio = dominio.replace(/^www\./i, '');
+
+    if (/amazon\./i.test(dominio)) {
+      return { ok: false, sitio: dominio,
+        error: 'La página respondió 503. Ese sitio bloquea lectores automáticos: rellena los campos a mano.' };
+    }
+    if (!/^https?:\/\//i.test(String(url))) {
+      return { ok: false, error: 'La URL tiene que empezar por http:// o https://' };
+    }
+    return {
+      ok: true,
+      sitio: dominio,
+      titulo: 'Cafetera de goteo con jarra de cristal 1,5 L y filtro permanente',
+      descripcion: 'Cafetera de goteo de 950 W con capacidad para 12 tazas, sistema antigoteo, filtro lavable y placa calefactora que mantiene el café caliente 40 minutos.',
+      precio: '39.90 EUR',
+      imagen: '',
+      error: ''
+    };
+  }
+};
+</script>
+
+<script>
+(function () {
+  'use strict';
+
+  var estado = { prompts: [], filtro: '', meta: {}, promptActual: null };
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* ── Puente con el backend (o con el mock en la vista previa) ── */
+  function api(nombre) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    return new Promise(function (ok, mal) {
+      if (window.MOCK_API && window.MOCK_API[nombre]) {
+        setTimeout(function () {
+          try { ok(window.MOCK_API[nombre].apply(null, args)); }
+          catch (e) { mal(e); }
+        }, window.MOCK_API.__retardo || 250);
+        return;
+      }
+      google.script.run.withSuccessHandler(ok).withFailureHandler(mal)[nombre].apply(null, args);
+    });
+  }
+
+  /* ── Almacenamiento local (sobrevive a recargas) ── */
+  function guardar() {
+    try {
+      localStorage.setItem('asistente-prompts', JSON.stringify({
+        producto: $('producto').value,
+        url: $('url').value,
+        extra: $('extra').value,
+        meta: estado.meta
+      }));
+    } catch (e) { /* modo incógnito */ }
+  }
+
+  function restaurar() {
+    var d;
+    try { d = JSON.parse(localStorage.getItem('asistente-prompts') || '{}'); }
+    catch (e) { d = {}; }
+    $('producto').value = d.producto || '';
+    $('url').value = d.url || '';
+    $('extra').value = d.extra || '';
+    if (d.extra) $('extra').closest('details').open = true;
+    if (d.meta && (d.meta.titulo || d.meta.descripcion || d.meta.precio)) {
+      pintarMeta(d.meta);
+    }
+  }
+
+  /* ── Variables disponibles en las plantillas ── */
+  function variables() {
+    var url = $('url').value.trim();
+    var dominio = '';
+    var m = url.match(/^https?:\/\/([^\/\?#:]+)/i);
+    if (m) dominio = m[1].replace(/^www\./i, '');
+    var hoy = new Date();
+    var iso = hoy.getFullYear() + '-' +
+      String(hoy.getMonth() + 1).padStart(2, '0') + '-' +
+      String(hoy.getDate()).padStart(2, '0');
+
+    return {
+      producto: $('producto').value.trim(),
+      url: url,
+      titulo: $('mTitulo').value.trim(),
+      descripcion: $('mDescripcion').value.trim(),
+      precio: $('mPrecio').value.trim(),
+      sitio: dominio,
+      extra: $('extra').value.trim(),
+      fecha: iso
+    };
+  }
+
+  /**
+   * Rellena la plantilla. Si una línea contiene SOLO variables vacías,
+   * la línea entera desaparece (no quedan etiquetas huérfanas tipo "Precio:").
+   */
+  function rellenar(plantilla, vars) {
+    var patron = /\{\{\s*(\w+)\s*\}\}/g;
+    var salida = String(plantilla).split('\n').filter(function (linea) {
+      var usadas = linea.match(patron);
+      if (!usadas) return true;
+      return usadas.some(function (t) {
+        var clave = t.replace(/[{}\s]/g, '');
+        return String(vars[clave] || '').trim() !== '';
+      });
+    }).map(function (linea) {
+      return linea.replace(patron, function (_, clave) {
+        return vars[clave] != null ? vars[clave] : '';
+      });
+    });
+
+    return salida.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+  }
+
+  /* ── Copiar al portapapeles, con dos planes B ── */
+  function copiar(texto) {
+    return new Promise(function (ok, mal) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(texto).then(ok).catch(function () { viejaEscuela(texto, ok, mal); });
+      } else {
+        viejaEscuela(texto, ok, mal);
+      }
+    });
+  }
+
+  function viejaEscuela(texto, ok, mal) {
+    var ta = document.createElement('textarea');
+    ta.value = texto;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, texto.length);
+    var bien = false;
+    try { bien = document.execCommand('copy'); } catch (e) { bien = false; }
+    document.body.removeChild(ta);
+    bien ? ok() : mal(new Error('sin-portapapeles'));
+  }
+
+  /* ── Avisos ── */
+  var relojToast;
+  function toast(texto, malo) {
+    var t = $('toast');
+    t.textContent = texto;
+    t.className = 'ver' + (malo ? ' malo' : '');
+    clearTimeout(relojToast);
+    relojToast = setTimeout(function () { t.className = ''; }, 2600);
+  }
+
+  /* ── Pintar la lista ── */
+  function pintarLista() {
+    var cont = $('lista');
+    var q = estado.filtro.toLowerCase();
+    var visibles = estado.prompts.filter(function (p) {
+      if (!q) return true;
+      return (p.nombre + ' ' + p.categoria + ' ' + p.descripcion + ' ' + p.destino).toLowerCase().indexOf(q) > -1;
+    });
+
+    $('contador').textContent = visibles.length + (visibles.length === 1 ? ' prompt' : ' prompts');
+    cont.innerHTML = '';
+
+    if (!visibles.length) {
+      $('estado').hidden = false;
+      $('estado').innerHTML = estado.prompts.length
+        ? 'Ningún prompt coincide con «' + escapar(estado.filtro) + '».'
+        : 'La hoja está vacía. Añade filas en el Sheet y pulsa Recargar.';
+      return;
+    }
+    $('estado').hidden = true;
+
+    var categoriaActual = null;
+    var grupo = null;
+
+    visibles.forEach(function (p) {
+      if (p.categoria !== categoriaActual) {
+        categoriaActual = p.categoria;
+        var h = document.createElement('div');
+        h.className = 'cat';
+        h.textContent = p.categoria;
+        cont.appendChild(h);
+        grupo = document.createElement('div');
+        grupo.className = 'tarjetas';
+        cont.appendChild(grupo);
+      }
+
+      var card = document.createElement('article');
+      card.className = 'tarjeta';
+      card.innerHTML =
+        (p.destino ? '<span class="badge">' + escapar(p.destino) + '</span>' : '') +
+        '<h3>' + escapar(p.nombre) + '</h3>' +
+        '<p>' + escapar(p.descripcion || '') + '</p>' +
+        '<div class="acciones">' +
+        '  <button class="btn" data-accion="copiar">Copiar</button>' +
+        '  <button class="btn-sec" data-accion="ver">Ver</button>' +
+        '</div>';
+
+      card.querySelector('[data-accion="copiar"]').addEventListener('click', function (ev) {
+        alCopiar(p, ev.currentTarget);
+      });
+      card.querySelector('[data-accion="ver"]').addEventListener('click', function () {
+        abrirModal(p);
+      });
+
+      grupo.appendChild(card);
+    });
+  }
+
+  function escapar(t) {
+    return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  /* ── Acciones ── */
+  function faltaProducto() {
+    if ($('producto').value.trim()) return false;
+    $('producto').classList.add('falta');
+    $('producto').focus();
+    toast('Escribe primero el nombre del producto', true);
+    setTimeout(function () { $('producto').classList.remove('falta'); }, 1800);
+    return true;
+  }
+
+  function alCopiar(p, boton) {
+    if (faltaProducto()) return;
+    var texto = rellenar(p.plantilla, variables());
+    copiar(texto).then(function () {
+      var antes = boton.textContent;
+      boton.textContent = '✓ Copiado';
+      boton.classList.add('hecho');
+      setTimeout(function () {
+        boton.textContent = antes;
+        boton.classList.remove('hecho');
+      }, 1600);
+      toast('Prompt copiado (' + texto.length + ' caracteres)');
+    }).catch(function () {
+      abrirModal(p, true);
+      toast('Tu navegador bloqueó el portapapeles: copia desde aquí', true);
+    });
+  }
+
+  function abrirModal(p, seleccionar) {
+    if (faltaProducto()) return;
+    estado.promptActual = p;
+    $('dlgTitulo').textContent = p.nombre;
+    $('dlgTexto').value = rellenar(p.plantilla, variables());
+    $('modal').showModal();
+    if (seleccionar) {
+      $('dlgTexto').focus();
+      $('dlgTexto').select();
+    }
+  }
+
+  function pintarMeta(datos) {
+    estado.meta = datos || {};
+    $('mTitulo').value = datos.titulo || '';
+    $('mDescripcion').value = datos.descripcion || '';
+    $('mPrecio').value = datos.precio || '';
+    $('metaSitio').textContent = datos.sitio || 'la página';
+    $('meta').hidden = false;
+  }
+
+  function leerUrl() {
+    var url = $('url').value.trim();
+    $('avisoUrl').hidden = true;
+    if (!url) {
+      $('meta').hidden = true;
+      estado.meta = {};
+      guardar();
+      return;
+    }
+
+    var b = $('btnLeer');
+    b.disabled = true;
+    b.textContent = 'Leyendo…';
+
+    api('leerUrl', url).then(function (r) {
+      if (r.ok) {
+        pintarMeta(r);
+        toast('Datos leídos de ' + (r.sitio || 'la página'));
+      } else {
+        pintarMeta({ sitio: r.sitio || '', titulo: '', descripcion: '', precio: '' });
+        $('avisoUrl').textContent = r.error + ' La URL sigue funcionando en los prompts.';
+        $('avisoUrl').hidden = false;
+      }
+      guardar();
+    }).catch(function (e) {
+      $('avisoUrl').textContent = 'Error al leer la URL: ' + (e.message || e);
+      $('avisoUrl').hidden = false;
+    }).then(function () {
+      b.disabled = false;
+      b.textContent = 'Leer URL';
+    });
+  }
+
+  function cargarPrompts(forzar) {
+    $('estado').hidden = false;
+    $('estado').textContent = forzar ? 'Recargando…' : 'Cargando prompts…';
+    return api('getPrompts', !!forzar).then(function (lista) {
+      estado.prompts = lista || [];
+      pintarLista();
+    }).catch(function (e) {
+      var msg = (e && e.message) || String(e);
+      $('estado').innerHTML = msg.indexOf('No hay hoja') > -1
+        ? 'Todavía no hay hoja de prompts.<br>Abre el editor de Apps Script y ejecuta <code>crearHojaDePrompts()</code>.'
+        : 'No pude leer los prompts:<br>' + escapar(msg);
+      $('estado').hidden = false;
+    });
+  }
+
+  /* ── Arranque ── */
+  function iniciar() {
+    restaurar();
+
+    ['producto', 'url', 'extra', 'mTitulo', 'mDescripcion', 'mPrecio'].forEach(function (id) {
+      $(id).addEventListener('input', function () {
+        estado.meta = {
+          titulo: $('mTitulo').value,
+          descripcion: $('mDescripcion').value,
+          precio: $('mPrecio').value,
+          sitio: $('metaSitio').textContent
+        };
+        guardar();
+      });
+    });
+
+    $('btnLeer').addEventListener('click', leerUrl);
+    $('url').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); leerUrl(); }
+    });
+
+    $('buscar').addEventListener('input', function (e) {
+      estado.filtro = e.target.value.trim();
+      pintarLista();
+    });
+
+    $('btnRecargar').addEventListener('click', function () { cargarPrompts(true); });
+
+    $('dlgCerrar').addEventListener('click', function () { $('modal').close(); });
+    $('dlgCerrar2').addEventListener('click', function () { $('modal').close(); });
+    $('dlgCopiar').addEventListener('click', function () {
+      copiar($('dlgTexto').value).then(function () {
+        toast('Prompt copiado');
+        $('modal').close();
+      }).catch(function () {
+        $('dlgTexto').focus();
+        $('dlgTexto').select();
+        toast('Pulsa Ctrl+C / Cmd+C para copiar', true);
+      });
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        $('buscar').focus();
+      }
+    });
+
+    api('getEstado').then(function (s) {
+      if (s && s.hojaUrl) {
+        $('linkHoja').href = s.hojaUrl;
+        $('linkHoja').hidden = false;
+      }
+    }).catch(function () { /* sin link, no pasa nada */ });
+
+    cargarPrompts(false);
+  }
+
+  document.addEventListener('DOMContentLoaded', iniciar);
+})();
+</script>
