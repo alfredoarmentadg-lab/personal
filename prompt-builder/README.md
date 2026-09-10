@@ -143,11 +143,26 @@ vista previa con backend falso) desde el mismo origen. Los prompts viven en un
 
 ## Diseño
 
-Navy institucional `#16324F` heredado del `#2E4057` de la landing, papel cálido
-neutro y terracota quemada como única señal (favoritos, avisos, campo
-obligatorio). IBM Plex en sus tres cortes: Serif para la identidad, Sans para la
-interfaz, Mono para los prompts. Filete de 1px en vez de sombras, radio 4px, sin
-degradados. Tema claro y oscuro por tokens, y responsive hasta 400px.
+Referencia: terminal de investigación / informe anual, no panel de SaaS.
+
+- **Casi monocromo.** Grafito `#131417` y papel frío `#EDEEF0`. El negro es el
+  color de la acción (botones, filtro activo). El burdeos `#8C3141` aparece solo
+  para marcar estado: favorito, campo obligatorio, aviso de URL, variable que
+  falta. Ningún elemento decorativo lleva color.
+- **Esquinas rectas en todo.** Radio 0, filete de 1px, cero sombras, cero
+  degradados. Los chips de categoría van pegados entre sí formando un control
+  segmentado, no pastillas sueltas.
+- **Tres tipografías con papel distinto.** Newsreader para la identidad y los
+  titulares de sección, Archivo para toda la interfaz, JetBrains Mono para el
+  texto de máquina: prompts, contadores y variables.
+- **Campos sin caja** en la banda de mando: solo filete inferior. Menos
+  formulario, más instrumento.
+- **Tira de variables.** Al pie de la banda, los ocho huecos de plantilla con su
+  estado: punto lleno si tienen valor, hueco si no. Cada tarjeta repite las que
+  usa esa plantilla y tacha las que están vacías, así ves de un vistazo qué
+  prompts van a salir cojos antes de copiarlos.
+- Tema claro y oscuro por tokens. En oscuro el botón de acción se invierte a
+  claro sobre negro. Responsive hasta 400px, con los chips en tira deslizable.
 
 ## Cosas que faltan (por si las quieres luego)
 

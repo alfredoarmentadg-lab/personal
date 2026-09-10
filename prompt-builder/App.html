@@ -70,6 +70,30 @@
   }
 
   var PATRON = /\{\{\s*(\w+)\s*\}\}/g;
+  var ORDEN_VARS = ['producto', 'url', 'titulo', 'descripcion', 'precio', 'sitio', 'extra', 'fecha'];
+
+  /** Variables que consume una plantilla, en orden de aparición y sin repetir. */
+  function usadas(plantilla) {
+    var lista = [], m, re = new RegExp(PATRON.source, 'g');
+    while ((m = re.exec(plantilla))) {
+      if (lista.indexOf(m[1]) === -1) lista.push(m[1]);
+    }
+    return lista;
+  }
+
+  /** Tira de estado: qué huecos tienen valor ahora mismo. */
+  function pintarVariables() {
+    var v = variables();
+    var cont = $('vlista');
+    cont.innerHTML = '';
+    ORDEN_VARS.forEach(function (k) {
+      var s = document.createElement('span');
+      s.className = 'var' + (String(v[k] || '').trim() ? ' lleno' : '');
+      s.textContent = k;
+      s.title = String(v[k] || '').trim() || 'sin valor: las líneas que solo usen esta variable desaparecen';
+      cont.appendChild(s);
+    });
+  }
 
   /**
    * Rellena la plantilla. Si una línea contiene SOLO variables vacías,
@@ -191,6 +215,8 @@
     var cont = $('lista');
     var visibles = estado.prompts.filter(coincide);
     var vars = variables(true);
+    var reales = variables();
+    pintarVariables();
 
     $('contador').textContent = visibles.length === estado.prompts.length
       ? estado.prompts.length + ' prompts'
@@ -212,7 +238,7 @@
     if (!agrupar) {
       var rejilla = document.createElement('div');
       rejilla.className = 'rejilla';
-      visibles.forEach(function (p) { rejilla.appendChild(ficha(p, vars, false)); });
+      visibles.forEach(function (p) { rejilla.appendChild(ficha(p, vars, reales, false)); });
       cont.appendChild(rejilla);
       return;
     }
@@ -230,17 +256,21 @@
 
       var r = document.createElement('div');
       r.className = 'rejilla';
-      delGrupo.forEach(function (p) { r.appendChild(ficha(p, vars, true)); });
+      delGrupo.forEach(function (p) { r.appendChild(ficha(p, vars, reales, true)); });
       grupo.appendChild(r);
       cont.appendChild(grupo);
     });
   }
 
-  function ficha(p, vars, agrupado) {
+  function ficha(p, vars, reales, agrupado) {
     var completo = rellenar(p.plantilla, vars);
     var n = palabras(completo);
     // En 4 líneas de tarjeta no caben renglones vacíos: se enseñan las 4 primeras con contenido.
     var muestra = completo.split('\n').filter(function (l) { return l.trim(); }).slice(0, 4).join('\n');
+    var tokens = usadas(p.plantilla).map(function (k) {
+      var vacia = !String(reales[k] || '').trim();
+      return '<span class="' + (vacia ? 'falta-dato' : '') + '">' + escapar(k) + '</span>';
+    }).join('');
 
     var el = document.createElement('article');
     el.className = 'ficha';
@@ -253,6 +283,7 @@
       '<h3>' + escapar(p.nombre) + '</h3>' +
       (p.descripcion ? '<p class="resumen">' + escapar(p.descripcion) + '</p>' : '') +
       '<pre class="muestra">' + escapar(muestra) + '</pre>' +
+      '<div class="usa" title="Variables que usa esta plantilla. Tachadas: sin valor ahora mismo.">' + tokens + '</div>' +
       '<div class="ficha-pie">' +
       '  <span class="medida">≈' + n + ' palabras' +
            (!agrupado && p.destino ? ' · ' + escapar(p.destino) : '') + '</span>' +
@@ -378,6 +409,7 @@
   /* ── Arranque ── */
   function iniciar() {
     restaurar();
+    pintarVariables();
 
     var reloj;
     ['producto', 'url', 'extra', 'mTitulo', 'mDescripcion', 'mPrecio'].forEach(function (id) {
@@ -389,6 +421,7 @@
           sitio: $('metaSitio').textContent
         };
         guardar();
+        pintarVariables();
         clearTimeout(reloj);
         reloj = setTimeout(pintarLista, 280);
       });
